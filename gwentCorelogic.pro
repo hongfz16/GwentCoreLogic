@@ -13,7 +13,9 @@ SOURCES += main.cpp \
     gwentgame.cpp \
     gamefield.cpp \
     gameunit.cpp \
-    cardmanager.cpp
+    cardmanager.cpp \
+    fieldmanager.cpp \
+    gameeffect.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -30,7 +32,9 @@ HEADERS += \
     gwentgame.h \
     gamefield.h \
     gameunit.h \
-    cardmanager.h
+    cardmanager.h \
+    fieldmanager.h \
+    gameeffect.h
 
 RESOURCES += \
     gwentresource.qrc

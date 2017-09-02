@@ -61,8 +61,8 @@ public slots:
 	void peekNCardsFromBase(int N, bool side);
 	void peekSpecificCardFromBase(int type,bool side);
 
-	void deployCards(GameUnit *unit, int rowNum, int index, bool side);
-	void deployCards(GameUnit *unit, int rowNum, GameUnit *target, bool side);
+	void deployCards(GameUnit *unit, int rowNum, int index);
+	void deployCards(GameUnit *unit, int rowNum, GameUnit *target);
 
 	void putCardBackToBase(GameUnit *unit, int type,bool side);
 
@@ -99,6 +99,11 @@ private:
 	void deleteFromVector(GameUnit *target);
 	void addToCemetery(int id, bool side);
 	void deleteFromHandCard(GameUnit *target);
+	std::vector<GameUnit*>* getRowByNum(int rowNum);
+	std::vector<GameUnit*>* getHandCardBySide(bool side);
+	std::vector<int> *getBaseBySide(bool side);
+	std::vector<int>* getCemeteryBySide(bool side);
+
 public:
     void setMyBase(std::vector<int>* _base);
 	void setOpBase(std::vector<int>* _base);
@@ -112,10 +117,7 @@ public:
 	const std::vector<GameUnit*>* getOpHandCard();
     const std::vector<int>* getMyCemetery();
     const std::vector<int>* getOpCemetery();
-	std::vector<GameUnit*>* getRowByNum(int rowNum);
-	std::vector<GameUnit*>* getHandCardBySide(bool side);
-	std::vector<int> *getBaseBySide(bool side);
-	std::vector<int>* getCemeteryBySide(bool side);
+
 };
 
 #endif // GAMEFIELD_H

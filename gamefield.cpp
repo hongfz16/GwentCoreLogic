@@ -11,15 +11,77 @@ GameField::GameField(QObject *parent) : QObject(parent)
     opMiddle.clear();
     opBack.clear();
     myBase.clear();
+	opBase.clear();
     myCemetery.clear();
     opCemetery.clear();
     myPoint=0;
     opPoint=0;
+	myFronPoint=0;
+	myMiddlePoint=0;
+	myBackPoint=0;
+	opFrontPoint=0;
+	opMiddlePoint=0;
+	opBackPoint=0;
 }
 
 void GameField::setMyBase(std::vector<int> *_base)
 {
 	myBase=*_base;
+}
+
+void GameField::setOpBase(std::vector<int> *_base)
+{
+	opBase=_base;
+}
+
+const std::vector<GameUnit *> *GameField::getMyFront()
+{
+	return &myFront;
+}
+
+const std::vector<GameUnit *> *GameField::getMyMiddle()
+{
+	return &myMiddle;
+}
+
+const std::vector<GameUnit *> *GameField::getMyBack()
+{
+	return &myBack;
+}
+
+const std::vector<GameUnit *> *GameField::getOpFront()
+{
+	return &opFront;
+}
+
+const std::vector<GameUnit *> *GameField::getOpMiddle()
+{
+	return &opMiddle;
+}
+
+const std::vector<GameUnit *> *GameField::getOpBack()
+{
+	return &opBack;
+}
+
+const std::vector<GameUnit *> *GameField::getMyHandCard()
+{
+	return &myHandCard;
+}
+
+const std::vector<GameUnit *> *GameField::getOpHandCard()
+{
+	return &opHandCard;
+}
+
+const std::vector<int> *GameField::getMyCemetery()
+{
+	return &myCemetery;
+}
+
+const std::vector<int> *GameField::getOpCemetery()
+{
+	return &opCemetery;
 }
 
 std::vector<GameUnit *> *GameField::getRowByNum(int rowNum)
@@ -44,51 +106,48 @@ std::vector<GameUnit *> *GameField::getRowByNum(int rowNum)
 
 std::vector<GameUnit *> *GameField::getHandCardBySide(bool side)
 {
-	switch (side) {
-	case true:
+	if(side)
+	{
 		return &myHandCard;
-		break;
-	case false:
+	}
+	else
+	{
 		return &opHandCard;
-	default:
-		break;
 	}
 }
 
 std::vector<int> *GameField::getBaseBySide(bool side)
 {
-	switch (side) {
-	case true:
+	if(side)
+	{
 		return &myBase;
-		break;
-	case false:
+	}
+	else
+	{
 		return &opBase;
-	default:
-		break;
 	}
 }
 
 std::vector<int> *GameField::getCemeteryBySide(bool side)
 {
-	switch (side) {
-	case true:
+	if(side)
+	{
 		return &myCemetery;
-		break;
-	case false:
+	}
+	else
+	{
 		return &opCemetery;
-	default:
-		break;
 	}
 }
 
-/*
+
 //TODO
 void choseByPlayer(std::vector<GameUnit*>& vec, int numToChose)
 {
 
 }
 
-*/
+
 void GameField::findWeakestInRow(std::vector<GameUnit *> *vec, int rowNum)
 {
 	vec->clear();
@@ -389,12 +448,13 @@ void GameField::peekNCardsFromBase(int N,bool side)
 	}
 }
 
+//TODO
 void GameField::peekSpecificCardFromBase(int type,bool side)
 {
 
 }
 
-void GameField::deployCards(GameUnit *unit, int rowNum, int index,bool side)
+void GameField::deployCards(GameUnit *unit, int rowNum, int index)
 {
 	deleteFromHandCard(unit);
 	std::vector<GameUnit*> *targetRow=getRowByNum(rowNum);
@@ -402,7 +462,7 @@ void GameField::deployCards(GameUnit *unit, int rowNum, int index,bool side)
 	targetRow->insert(targetIt,unit);
 }
 
-void GameField::deployCards(GameUnit *unit, int rowNum, GameUnit *target,bool side)
+void GameField::deployCards(GameUnit *unit, int rowNum, GameUnit *target)
 {
 	deleteFromHandCard(unit);
 	std::vector<GameUnit*> *targetRow=getRowByNum(rowNum);
@@ -455,12 +515,30 @@ void GameField::resurrectCard(int id, bool cemeterySide, bool resurrectSide)
 
 void GameField::generateNCard(int id, int rowNum, int index, int N)
 {
-
+	std::vector<GameUnit*> *targetRow=getRowByNum(rowNum);
+	for(int i=0;i<N;++i)
+	{
+		auto it=targetRow->begin()+index;
+		GameUnit *unit=new GameUnit(id);
+		targetRow->insert(it,unit);
+	}
 }
 
 void GameField::generateNCard(int id, int rowNum, GameUnit *target, int N)
 {
+	std::vector<GameUnit*> *targetRow=getRowByNum(rowNum);
+	for(int i=0;i<N;++i)
+	{
+		auto it=targetRow->begin();
+		for(;it!=targetRow->end();++it)
+		{
+			if((*it)==target)
+				break;
+		}
 
+		GameUnit *unit=new GameUnit(id);
+		targetRow->insert(it,unit);
+	}
 }
 
 void GameField::deleteFromVector(GameUnit *target)
