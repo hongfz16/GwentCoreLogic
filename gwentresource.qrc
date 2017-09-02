@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/">
-        <file>../../../Codes/qt/gwentCorelogic/jsonFile/100000.json</file>
+    <qresource prefix="/json">
+        <file>jsonFile/100000.json</file>
     </qresource>
 </RCC>

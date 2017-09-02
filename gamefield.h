@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <vector>
+#include <cstdlib>
+#include <ctime>
 #include <gameunit.h>
 
 class GameField : public QObject
@@ -14,7 +16,21 @@ public:
 signals:
 
 public slots:
-    /*rowNum def
+	void findWeakestInRow(std::vector<GameUnit *> *vec, int rowNum);
+	void findWeakestInRow(std::vector<GameUnit*> *vec, int rowNum, int maxNum);
+
+	void findStrongestInRow(std::vector<GameUnit*> *vec,int rowNum);
+	void findStrongestInRow(std::vector<GameUnit *> *vec, int rowNum,int maxNum);
+
+	void findNear(std::vector<GameUnit*> *vec, int rowNum, GameUnit *target, int type, int maxNum);
+	//type==0 random
+	//type==1 left
+	//type==2 right
+
+	void findWeakestInAll(std::vector<GameUnit*> *vec);
+	void findWeakestInAll(std::vector<GameUnit*> *vec, int maxNum);
+
+	/*rowNum def
      * -3 opBack
      * -2 opMiddle
      * -1 opFront
@@ -22,69 +38,43 @@ public slots:
      * 2 myMiddle
      * 3 myBack
      */
+	void findStrongestInAll(std::vector<GameUnit *> *vec);
+	void findStrongestInAll(std::vector<GameUnit *> *vec, int maxNum);
 
-//#FIND TARGETS:
+	void damageByN(std::vector<GameUnit*> *vec,int N);
+	void damageByNUnseenProtection(std::vector<GameUnit *> *vec, int N);
 
-//TODO
-/*
-void choseByPlayer(std::vector<GameUnit*>&, int numToChose);
+	void boostByN(std::vector<GameUnit*> *vec,int N);
 
-void findWeakestInRow(std::vector<GameUnit*>&, int rowNum, int maxNum);
+	void addProtectionByN(std::vector<GameUnit*> *vec,int N);
 
-void findStrongestInRow(vector<card*>&, int rowNum, int maxNum);
+	void lockTarget(std::vector<GameUnit*> *vec);
 
-void findNear(vector<card*>&, int rowNum, int index, int maxNum);
+	void makePowerToN(std::vector<GameUnit*> *vec,int N);
 
-void findWeakestInAll(vector<card*>&, int maxNum);
-void findStrongestInAll(vector<card*>&, int maxNum);
+	void destroyTarget(std::vector<GameUnit*> *vec);
 
-//#CHANGE CONDITION:
+	void eatTarget(std::vector<GameUnit*> *vec,GameUnit *eator);
 
-void damageByN(vector<card*>&, int N);
-void damageByNUnseenProtection(vector<card*>&, int N);
+	void moveTarget(std::vector<GameUnit*> *vec,int toRow);
 
-void boostByN(vector<card*>&, int N);
+	void peekNCardsFromBase(int N, bool side);
+	void peekSpecificCardFromBase(int type,bool side);
 
-void addProtectionByN(vector<card*>&, int N);
+	void deployCards(GameUnit *unit, int rowNum, int index, bool side);
+	void deployCards(GameUnit *unit, int rowNum, GameUnit *target, bool side);
 
-void lockTarget(vector<card*>&);
+	void putCardBackToBase(GameUnit *unit, int type,bool side);
 
-void makePowerToN(vector<card*>&, int N);
+	void resurrectCard(int id, bool cemeterySide,bool resurrectSide);
 
-void destroyTarget(vector<card*>&);
+	void generateNCard(int id,int rowNum,int index,int N);
+	void generateNCard(int id, int rowNum,GameUnit *target, int N);
 
-void eatTarget(vector<card*>&);
 
-void moveTarget(vector<card*>&, int rowNum,int index);
-
-//#CHANGE HAND CARD
-
-void peekNCardsFromBase(int N);
-void peekSpecificCardFromBase(int type);
-
-void deployCards(int id);
-
-void putCardBackToBase(int id, int type);
-
-#CHANGE SEMETREY
-
-void resurrectCard(int id,int rowNum,int index);
-
-#GENERATE CARD
-
-void generateNCard(int id,int rowNum,int index,int num);
-
-#ABOUT SKILLS
-
-void activateDeadWish(vector<card*>&);
-
-void changeWeatherDamageToN(int weatherType, int N);
-
-void removeWeather(int rowNum);
-
-*/
 private:
-    std::vector<GameUnit*> handCard;
+	std::vector<GameUnit*> myHandCard;
+	std::vector<GameUnit*> opHandCard;
     std::vector<GameUnit*> myFront;
     std::vector<GameUnit*> myMiddle;
     std::vector<GameUnit*> myBack;
@@ -93,23 +83,39 @@ private:
     std::vector<GameUnit*> opBack;
 
     std::vector<int> myBase;
+	std::vector<int> opBase;
     std::vector<int> myCemetery;
     std::vector<int> opCemetery;
 
-    int myPoint;
-    int opPoint;
+	unsigned int myPoint;
+	unsigned int opPoint;
+	unsigned int myFronPoint;
+	unsigned int myMiddlePoint;
+	unsigned int myBackPoint;
+	unsigned int opFrontPoint;
+	unsigned int opMiddlePoint;
+	unsigned int opBackPoint;
 
+	void deleteFromVector(GameUnit *target);
+	void addToCemetery(int id, bool side);
+	void deleteFromHandCard(GameUnit *target);
 public:
     void setMyBase(std::vector<int>* _base);
+	void setOpBase(std::vector<int>* _base);
     const std::vector<GameUnit*>* getMyFront();
     const std::vector<GameUnit*>* getMyMiddle();
     const std::vector<GameUnit*>* getMyBack();
     const std::vector<GameUnit*>* getOpFront();
     const std::vector<GameUnit*>* getOpMiddle();
     const std::vector<GameUnit*>* getOpBack();
-    const std::vector<GameUnit*>* getHandCard();
+	const std::vector<GameUnit*>* getMyHandCard();
+	const std::vector<GameUnit*>* getOpHandCard();
     const std::vector<int>* getMyCemetery();
     const std::vector<int>* getOpCemetery();
+	std::vector<GameUnit*>* getRowByNum(int rowNum);
+	std::vector<GameUnit*>* getHandCardBySide(bool side);
+	std::vector<int> *getBaseBySide(bool side);
+	std::vector<int>* getCemeteryBySide(bool side);
 };
 
 #endif // GAMEFIELD_H

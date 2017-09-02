@@ -66,5 +66,20 @@ void GameUnit::addLock()
 {
     locked=true;
 
-    emit stateChanged();
+	emit stateChanged();
+}
+
+void GameUnit::setFightToN(int N)
+{
+	fight=N;
+}
+
+void GameUnit::setRowNum(int num)
+{
+	rowNum=num;
+}
+
+void GameUnit::setSide(bool _side)
+{
+	side=_side;
 }

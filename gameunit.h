@@ -23,12 +23,17 @@ private:
     int protection;
     bool locked;
 
+	int rowNum;
+	bool side;
+
 public:
     int getCardId() const {return cardId;}
     bool getType() const {return type;}
     int getFight() const {return fight;}
     int getProtection() const {return protection;}
     bool isLocked() const {return locked;}
+	int getRowNum() const {return rowNum;}
+	int getSide() const {return side;}
 
     void decreaseFight(int num, bool protectionUnseen=false);
     void addFight(int num);
@@ -36,6 +41,10 @@ public:
     void addProtection(int num);
     void undoLock();
     void addLock();
+
+	void setFightToN(int N);
+	void setRowNum(int num);
+	void setSide(bool _side);
 };
 
 #endif // GAMEUNIT_H

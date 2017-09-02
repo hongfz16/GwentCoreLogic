@@ -4,7 +4,7 @@ CardManager::CardManager(int _cardId, QObject *parent) : QObject(parent)
 {
     cardId=_cardId;
 
-    fileName=":/json/"+QString::number(cardId)+".json";
+	fileName=":/json/jsonFile/"+QString::number(cardId)+".json";
 
     qDebug()<<fileName;
 
