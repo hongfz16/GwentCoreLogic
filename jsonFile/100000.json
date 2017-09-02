@@ -1,0 +1,24 @@
+{
+	"id":100000,
+	"name":"test",
+	"fight":100,
+	"instantOperation":
+	{
+		"condition":
+		{
+
+		},
+		"steps":
+		{
+
+		}
+	},
+	"routineOperation":
+	{
+
+	},
+	"deadWish":
+	{
+
+	}
+}
