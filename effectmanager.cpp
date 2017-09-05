@@ -36,7 +36,7 @@ std::vector<GameUnit *> *EffectManager::getTargetVec(QString key)
 		}
 		if(key==QString("chooseRow"))
 		{
-			std::vector<GameUnit*> *vec;
+			std::vector<GameUnit*> *vec=nullptr;
 			getRow(vec,chooseRow());
 			vecMap["chooseRow"]=vec;
 			return vec;
@@ -90,6 +90,7 @@ bool EffectManager::judgeCondition(QJsonObject JOCondition)
 	{
 		return judgeExist((*it).toObject());
 	}
+	return true;
 }
 
 bool EffectManager::judgeCompare(QJsonObject JOCompare)
@@ -120,13 +121,12 @@ int EffectManager::judgeCompareGetNum(QJsonValue JVNum)
 			QString paraString=JAPara[0].toString();
 			para=transRowNum(paraString);
 
-			std::vector<GameUnit*> *vec;
+			std::vector<GameUnit*> *vec=nullptr;
 			getRow(vec,para);
 			return getRowFight(vec);
 		}
 		else if(funcName==QString("getTargetFight"))
 		{
-			int para=0;
 			QJsonValue JVPara=JONum["parameter"];
 
 			QJsonArray JAPara=JVPara.toArray();
@@ -240,11 +240,12 @@ int EffectManager::transRowNum(QString rowInfo)
 		return -(self->getRowNum());
 	if(rowInfo=="choose")
 		return chooseRow();
+	return -1;
 }
 
 void EffectManager::findTarget(QJsonObject JOFind)
 {
-	std::vector<GameUnit*> *vec;
+	std::vector<GameUnit*> *vec=nullptr;
 	QString paraNum=(JOFind["parameter"].toArray())[0].toString();
 	vecMap[paraNum]=vec;
 	int size=(JOFind["parameter"].toArray()).size();
@@ -260,7 +261,7 @@ void EffectManager::findTarget(QJsonObject JOFind)
 			emit findWeakestInRow(vec,para2);
 			return;
 		case 3:
-			emit findWeakestInRow(vec,para2,JAPara[2].toInt());
+			emit findWeakestInRow(vec,para2,intMap[JAPara[2].toString()]);
 			return;
 		}
 	}
@@ -273,14 +274,14 @@ void EffectManager::findTarget(QJsonObject JOFind)
 			emit findStrongestInRow(vec,para2);
 			return;
 		case 3:
-			emit findStrongestInRow(vec,para2,JAPara[2].toInt());
+			emit findStrongestInRow(vec,para2,intMap[JAPara[2].toString()]);
 			return;
 		}
 	}
 	if(funcName==QString("findNear"))
 	{
 		para2=transRowNum((JOFind["parameter"].toArray())[1].toString());
-		emit findNear(vec,para2,self,JAPara[2].toInt(),JAPara[3].toInt());
+		emit findNear(vec,para2,self,intMap[JAPara[3].toString()],intMap[JAPara[4].toString()]);
 		return;
 	}
 	if(funcName==QString("findWeakestInAll"))
