@@ -13,14 +13,15 @@ class CardManager : public QObject
 {
 	Q_OBJECT
 public:
-        explicit CardManager(int _cardId, QObject *parent = nullptr);
+	explicit CardManager(int _cardId, QObject *parent = nullptr);
+	~CardManager();
 
 signals:
 
 public slots:
 
 private:
-    int cardId;
+	int cardId;
     QString fileName;
     QJsonDocument *jsonFile;
     QJsonObject *jsonObject;
@@ -28,6 +29,9 @@ private:
 public:
     int getFight();
     QString getName();
+	QJsonObject getDeployEffect();
+	QJsonObject getRoutineEffect();
+	QJsonObject getDeadWishEffect();
 };
 
 #endif // CARDMANAGER_H

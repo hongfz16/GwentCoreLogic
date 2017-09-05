@@ -19,7 +19,13 @@ CardManager::CardManager(int _cardId, QObject *parent) : QObject(parent)
     jsonObject=new QJsonObject();
 
     *jsonFile=QJsonDocument::fromJson(val.toUtf8());
-    *jsonObject=jsonFile->object();
+	*jsonObject=jsonFile->object();
+}
+
+CardManager::~CardManager()
+{
+	delete(jsonFile);
+	delete(jsonObject);
 }
 
 int CardManager::getFight()
@@ -31,5 +37,24 @@ int CardManager::getFight()
 QString CardManager::getName()
 {
     QJsonValue JVName=jsonObject->value(QString("name"));
-    return JVName.toString();
+	return JVName.toString();
 }
+
+QJsonObject CardManager::getDeployEffect()
+{
+	QJsonValue JVDeploy=jsonObject->value(QString("DeployEffect"));
+	return JVDeploy.toObject();
+}
+
+QJsonObject CardManager::getRoutineEffect()
+{
+	QJsonValue JVRoutine=jsonObject->value(QString("RoutineEffect"));
+	return JVRoutine.toObject();
+}
+
+QJsonObject CardManager::getDeadWishEffect()
+{
+	QJsonValue JVDeadWish=jsonObject->value(QString("DeadWish"));
+	return JVDeadWish.toObject();
+}
+

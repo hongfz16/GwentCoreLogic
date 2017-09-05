@@ -31,7 +31,7 @@ void GameField::setMyBase(std::vector<int> *_base)
 
 void GameField::setOpBase(std::vector<int> *_base)
 {
-	opBase=_base;
+	opBase=*_base;
 }
 
 const std::vector<GameUnit *> *GameField::getMyFront()
@@ -539,6 +539,11 @@ void GameField::generateNCard(int id, int rowNum, GameUnit *target, int N)
 		GameUnit *unit=new GameUnit(id);
 		targetRow->insert(it,unit);
 	}
+}
+
+void GameField::getRow(std::vector<GameUnit *> *vec, int rowNum)
+{
+	vec=getRowByNum(rowNum);
 }
 
 void GameField::deleteFromVector(GameUnit *target)

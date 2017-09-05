@@ -17,7 +17,6 @@ public slots:
 
 private:
 	std::vector<GameUnit*> *targets;
-	int
 };
 
 #endif // GAMEEFFECT_H

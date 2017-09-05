@@ -71,6 +71,7 @@ public slots:
 	void generateNCard(int id,int rowNum,int index,int N);
 	void generateNCard(int id, int rowNum,GameUnit *target, int N);
 
+	void getRow(std::vector<GameUnit*> *vec,int rowNum);
 
 private:
 	std::vector<GameUnit*> myHandCard;
