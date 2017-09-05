@@ -9,14 +9,18 @@
 #include <cardmanager.h>
 #include <gameunit.h>
 #include <vector>
+#include <map>
 
 class EffectManager : public QObject
 {
 	Q_OBJECT
 public:
-	explicit EffectManager(GameUnit *target,int effectType,QObject *parent = nullptr);
+	explicit EffectManager(bool _side, GameUnit *target, int effectType, QObject *parent = nullptr);
 
 signals:
+
+	/*****************************/
+	//FIND TARGET
 	void findWeakestInRow(std::vector<GameUnit *> *vec, int rowNum);
 	void findWeakestInRow(std::vector<GameUnit*> *vec, int rowNum, int maxNum);
 
@@ -42,6 +46,8 @@ signals:
 	void findStrongestInAll(std::vector<GameUnit *> *vec);
 	void findStrongestInAll(std::vector<GameUnit *> *vec, int maxNum);
 
+	/****************************/
+
 	void damageByN(std::vector<GameUnit*> *vec,int N);
 	void damageByNUnseenProtection(std::vector<GameUnit *> *vec, int N);
 
@@ -62,36 +68,51 @@ signals:
 	void peekNCardsFromBase(int N, bool side);
 	void peekSpecificCardFromBase(int type,bool side);
 
-	void deployCards(GameUnit *unit, int rowNum, int index);
-	void deployCards(GameUnit *unit, int rowNum, GameUnit *target);
 
 	void putCardBackToBase(GameUnit *unit, int type,bool side);
 
 	void resurrectCard(int id, bool cemeterySide,bool resurrectSide);
 
-	void generateNCard(int id,int rowNum,int index,int N);
 	void generateNCard(int id, int rowNum,GameUnit *target, int N);
 
 	void getRow(std::vector<GameUnit*> *vec,int rowNum);
+
+	/***************/
+	//ADD
+	void deployCards(int id,int rowNum,std::vector<GameUnit*> *vec);
+
+	//DELETE
+	//void deployCards(GameUnit *unit, int rowNum, int index);
+	//void deployCards(GameUnit *unit, int rowNum, GameUnit *target);
+	//void generateNCard(int id,int rowNum,int index,int N);
+
+	/**************/
 
 private:
 	CardManager *cm;
 
 	GameUnit *self;
 
+	bool side;
 
-	std::vector<std::vector<GameUnit*>* > targetVecs;
 
-	std::vector<int> paraInt;
+	std::map<QString,std::vector<GameUnit*>* > vecMap;
 
-	std::vector<GameUnit*> *getTargetVec(int index);
-	int getParaInt(int index);
+	std::map<QString,int> intMap;
+
+	std::map<QString,bool> boolMap;
+
+	std::map<QString,GameUnit*> unitMap;
+
+	std::vector<GameUnit*> *getTargetVec(QString key);
+	int getTargetInt(QString key);
 
 	int timer;
 
 	bool myTimerUp();
 
 	QJsonObject effectJson;
+	QJsonObject prepareJson;
 
 	int getRowFight(std::vector<GameUnit*> *vec);
 	int getTargetFight(std::vector<GameUnit*> *vec);
@@ -107,15 +128,16 @@ private:
 
 	int transRowNum(QString rowInfo);
 
-	std::vector<GameUnit*> transFind(QString transInfo,int rowNum);
-	std::vector<GameUnit*> transFind(QString transInfo,int rowNum,int maxNum);
-	std::vector<GameUnit*> transFind(QString transInfo, int rowNum,int maxNum,int type,GameUnit *target);
+	void findTarget(QJsonObject JOFind);
+
+	void prepare();
 
 public slots:
 	void implementEffect();
 	void updateTimer();
 
 	int chooseRow(); //TODO UI RELATED
+	std::vector<GameUnit*> *chooseTarget();
 };
 
 #endif // EFFECTMANAGER_H

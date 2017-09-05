@@ -32,6 +32,7 @@ public:
 	QJsonObject getDeployEffect();
 	QJsonObject getRoutineEffect();
 	QJsonObject getDeadWishEffect();
+	QJsonObject getPrepare();
 };
 
 #endif // CARDMANAGER_H

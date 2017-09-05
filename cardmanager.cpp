@@ -58,3 +58,9 @@ QJsonObject CardManager::getDeadWishEffect()
 	return JVDeadWish.toObject();
 }
 
+QJsonObject CardManager::getPrepare()
+{
+	QJsonValue JVDeadWish=jsonObject->value(QString("Prepare"));
+	return JVDeadWish.toObject();
+}
+
