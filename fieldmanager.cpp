@@ -1,8 +1,12 @@
 #include "fieldmanager.h"
 
-FieldManager::FieldManager(QObject *parent) : QObject(parent)
+FieldManager::FieldManager(std::vector<int> *myBase, std::vector<int> *opBase, QObject *parent) : QObject(parent)
 {
 	myField=new GameField();
+
+	myField->setMyBase(myBase);
+	myField->setOpBase(opBase);
+
 	srand((unsigned)time(NULL));
 	side=(rand()%2==0) ? false:true;
 }
@@ -37,6 +41,30 @@ void FieldManager::implementPassive()
 	{
 		(*it)->implementEffect();
 	}
+}
+
+void FieldManager::shuffle()
+{
+	myField->shuffle();
+}
+
+void FieldManager::firstDraw()
+{
+	myField->peekCards(CONSTANT::firstExchangeNum);
+	for(int i=0;i<CONSTANT::firstExchangeNum;++i)
+	{
+//TODO
+	}
+}
+
+void FieldManager::secondDraw()
+{
+
+}
+
+void FieldManager::thirdDraw()
+{
+
 }
 
 void FieldManager::addEffect(int _id,GameUnit *target)

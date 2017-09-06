@@ -24,6 +24,20 @@ GameField::GameField(QObject *parent) : QObject(parent)
 	opBackPoint=0;
 }
 
+void GameField::gameUnitChanged(GameUnit *target)
+{
+	std::vector<GameUnit*> *targetRow=getRowByNum(target->getRowNum());
+	int count=0;
+	auto it=targetRow->begin();
+	for(;it!=targetRow->end();++it)
+	{
+		if((*it)==target)
+			break;
+		count++;
+	}
+	emit gameUnitChangedToClient(target->getRowNum(),count,target->getSide());
+}
+
 void GameField::setMyBase(std::vector<int> *_base)
 {
 	myBase=*_base;
@@ -84,6 +98,30 @@ const std::vector<int> *GameField::getOpCemetery()
 	return &opCemetery;
 }
 
+void GameField::shuffle()
+{
+	shuffleVec(&myBase);
+	shuffleVec(&opBase);
+}
+
+void GameField::peekCards(int Num)
+{
+	peekNCardsFromBase(Num,true);
+	peekNCardsFromBase(Num,false);
+}
+
+void GameField::exchangeCards(int index,bool side)
+{
+	if(side)
+	{
+		exchangeCards(index,myHandCard,myBase);
+	}
+	else
+	{
+		exchangeCards(index,opHandCard,opBase);
+	}
+}
+
 std::vector<GameUnit *> *GameField::getRowByNum(int rowNum)
 {
 	switch (rowNum) {
@@ -138,6 +176,43 @@ std::vector<int> *GameField::getCemeteryBySide(bool side)
 	{
 		return &opCemetery;
 	}
+}
+
+void GameField::shuffleVec(std::vector<int> *vec)
+{
+	int size=static_cast<int>(vec->size());
+	std::vector<int> temp;
+	srand((unsigned)time(NULL));
+	for(int i=0;i<size;++i)
+	{
+		temp.push_back(rand());
+	}
+	for(int i=1;i<size;++i)
+	{
+		for(int j=i;j>0;--j)
+		{
+			if(temp[j]<temp[j-1])
+			{
+				int te=temp[j];
+				temp[j]=temp[j-1];
+				temp[j-1]=te;
+				te=(*vec)[j];
+				(*vec)[j]=(*vec)[j-1];
+				(*vec)[j-1]=te;
+			}
+		}
+	}
+}
+
+void GameField::exchangeCards(int index,std::vector<GameUnit*> *handCard,std::vector<int> *base)
+{
+	int id=(*handCard)[index]->getCardId();
+	delete((*handCard)[index]);
+	(*handCard)[index]=new GameUnit(*(base->rend()));
+	base->pop_back();
+	srand((unsigned)time(NULL));
+	auto it=base->begin()+(rand()%static_cast<int>(base->size()));
+	base->insert(it,id);
 }
 
 
@@ -359,6 +434,12 @@ void GameField::damageByN(std::vector<GameUnit *> *vec, int N)
 	for(auto it=vec->begin();it!=vec->end();++it)
 	{
 		(*it)->decreaseFight(N);
+		if((*it)->getFight()==0)
+		{
+			std::vector<GameUnit*> temp;
+			temp.push_back((*it));
+			destroyTarget(&temp);
+		}
 	}
 }
 
@@ -367,6 +448,12 @@ void GameField::damageByNUnseenProtection(std::vector<GameUnit *> *vec, int N)
 	for(auto it=vec->begin();it!=vec->end();++it)
 	{
 		(*it)->decreaseFight(N,true);
+		if((*it)->getFight()==0)
+		{
+			std::vector<GameUnit*> temp;
+			temp.push_back((*it));
+			destroyTarget(&temp);
+		}
 	}
 }
 
@@ -444,6 +531,7 @@ void GameField::peekNCardsFromBase(int N,bool side)
 		unit->setRowNum(0);
 		unit->setSide(side);
 		getHandCardBySide(side)->push_back(unit);
+		connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
 		getBaseBySide(side)->erase(it);
 	}
 }
@@ -511,6 +599,7 @@ void GameField::resurrectCard(int id, bool cemeterySide, bool resurrectSide)
 	unit->setSide(resurrectSide);
 	unit->setRowNum(0);
 	targetHand->push_back(unit);
+	connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
 }
 
 void GameField::generateNCard(int id, int rowNum, int index, int N)
@@ -549,12 +638,15 @@ void GameField::getRow(std::vector<GameUnit *> *vec, int rowNum)
 void GameField::deleteFromVector(GameUnit *target)
 {
 	std::vector<GameUnit*> *targetRow=getRowByNum(target->getRowNum());
+	int count=0;
 	auto it=targetRow->begin();
 	for(;it!=targetRow->end();++it)
 	{
 		if((*it)==target)
 			break;
+		count++;
 	}
+	emit toBeDestroyed(target->getRowNum(),count,target->getSide());
 	targetRow->erase(it);
 }
 

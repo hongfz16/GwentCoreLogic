@@ -17,7 +17,7 @@ public:
 	explicit FieldManager(std::vector<int>* myBase,std::vector<int>* opBase,QObject *parent = nullptr);
 
 signals:
-
+	
 
 private:
 	std::vector<EffectManager*> instantEffects;

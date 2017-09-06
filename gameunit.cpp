@@ -31,55 +31,59 @@ void GameUnit::decreaseFight(int num, bool protectionUnseen)
         }
     }
 
-    emit stateChanged();
+	emit stateChanged(this);
 }
 
 void GameUnit::addFight(int num)
 {
     fight+=num;
 
-    emit stateChanged();
+	emit stateChanged(this);
 }
 
 void GameUnit::decreaseProtection(int num)
 {
     protection-=num;
 
-    emit stateChanged();
+	emit stateChanged(this);
 }
 
 void GameUnit::addProtection(int num)
 {
     protection+=num;
 
-    emit stateChanged();
+	emit stateChanged(this);
 }
 
 void GameUnit::undoLock()
 {
     locked=false;
 
-    emit stateChanged();
+	emit stateChanged(this);
 }
 
 void GameUnit::addLock()
 {
     locked=true;
 
-	emit stateChanged();
+	emit stateChanged(this);
 }
 
 void GameUnit::setFightToN(int N)
 {
 	fight=N;
+
+	emit stateChanged(this);
 }
 
 void GameUnit::setRowNum(int num)
 {
 	rowNum=num;
+	emit stateChanged(this);
 }
 
 void GameUnit::setSide(bool _side)
 {
 	side=_side;
+	emit stateChanged(this);
 }

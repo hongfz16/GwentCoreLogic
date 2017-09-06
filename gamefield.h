@@ -14,8 +14,13 @@ public:
 	explicit GameField(QObject *parent = nullptr);
 
 signals:
+	void gameUnitChangedToClient(int rowNum,int index,bool side);
+	void toBeDestroyed(int rowNum,int index,bool side);
 
 public slots:
+
+	void gameUnitChanged(GameUnit*target);
+
 	void findWeakestInRow(std::vector<GameUnit *> *vec, int rowNum);
 	void findWeakestInRow(std::vector<GameUnit*> *vec, int rowNum, int maxNum);
 
@@ -100,15 +105,20 @@ private:
 	void deleteFromVector(GameUnit *target);
 	void addToCemetery(int id, bool side);
 	void deleteFromHandCard(GameUnit *target);
+
 	std::vector<GameUnit*>* getRowByNum(int rowNum);
 	std::vector<GameUnit*>* getHandCardBySide(bool side);
 	std::vector<int> *getBaseBySide(bool side);
 	std::vector<int>* getCemeteryBySide(bool side);
 
+	void shuffleVec(std::vector<int>* vec);
+	void exchangeCards(int index, std::vector<GameUnit *> *handCard, std::vector<int> *base);
+
 public:
     void setMyBase(std::vector<int>* _base);
 	void setOpBase(std::vector<int>* _base);
-    const std::vector<GameUnit*>* getMyFront();
+
+	const std::vector<GameUnit*>* getMyFront();
     const std::vector<GameUnit*>* getMyMiddle();
     const std::vector<GameUnit*>* getMyBack();
     const std::vector<GameUnit*>* getOpFront();
@@ -118,6 +128,10 @@ public:
 	const std::vector<GameUnit*>* getOpHandCard();
     const std::vector<int>* getMyCemetery();
     const std::vector<int>* getOpCemetery();
+
+	void shuffle();
+	void peekCards(int Num);
+	void exchangeCards(int index, bool side);
 
 };
 

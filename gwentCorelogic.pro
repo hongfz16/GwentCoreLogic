@@ -34,7 +34,8 @@ HEADERS += \
     gameunit.h \
     cardmanager.h \
     fieldmanager.h \
-    effectmanager.h
+    effectmanager.h \
+    gameconstant.h
 
 RESOURCES += \
     gwentresource.qrc

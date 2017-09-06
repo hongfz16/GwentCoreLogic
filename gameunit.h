@@ -12,7 +12,7 @@ public:
         explicit GameUnit(int _cardId, QObject *parent = nullptr);
 
 signals:
-    void stateChanged();
+	void stateChanged(GameUnit*);
 public slots:
 
 private:
