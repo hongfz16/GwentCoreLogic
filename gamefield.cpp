@@ -14,14 +14,6 @@ GameField::GameField(QObject *parent) : QObject(parent)
 	opBase.clear();
     myCemetery.clear();
     opCemetery.clear();
-    myPoint=0;
-    opPoint=0;
-	myFronPoint=0;
-	myMiddlePoint=0;
-	myBackPoint=0;
-	opFrontPoint=0;
-	opMiddlePoint=0;
-	opBackPoint=0;
 }
 
 void GameField::gameUnitChanged(GameUnit *target)
@@ -35,7 +27,7 @@ void GameField::gameUnitChanged(GameUnit *target)
 			break;
 		count++;
 	}
-	emit gameUnitChangedToClient(target->getRowNum(),count,target->getSide());
+	emit gameUnitChangedToClient(target->getOldRowNum(),count,target->getSide());
 }
 
 void GameField::setMyBase(std::vector<int> *_base)
@@ -114,11 +106,11 @@ void GameField::exchangeCards(int index,bool side)
 {
 	if(side)
 	{
-		exchangeCards(index,myHandCard,myBase);
+		exchangeCard(index,&myHandCard,&myBase);
 	}
 	else
 	{
-		exchangeCards(index,opHandCard,opBase);
+		exchangeCard(index,&opHandCard,&opBase);
 	}
 }
 
@@ -204,7 +196,7 @@ void GameField::shuffleVec(std::vector<int> *vec)
 	}
 }
 
-void GameField::exchangeCards(int index,std::vector<GameUnit*> *handCard,std::vector<int> *base)
+void GameField::exchangeCard(int index,std::vector<GameUnit*> *handCard,std::vector<int> *base)
 {
 	int id=(*handCard)[index]->getCardId();
 	delete((*handCard)[index]);
@@ -497,7 +489,16 @@ void GameField::destroyTarget(std::vector<GameUnit *> *vec)
 			addToCemetery((*it)->getCardId(),true);
 		else
 			addToCemetery((*it)->getCardId(),false);
-
+		std::vector<GameUnit*> *targetRow=getRowByNum((*it)->getRowNum());
+		int count=0;
+		auto itt=targetRow->begin();
+		for(;itt!=targetRow->end();++itt)
+		{
+			if((*itt)==(*it))
+				break;
+			count++;
+		}
+		emit toBeDestroyed((*it)->getRowNum(),count,(*it)->getSide());
 		deleteFromVector((*it));
 		delete((*it));
 	}
@@ -635,6 +636,11 @@ void GameField::getRow(std::vector<GameUnit *> *vec, int rowNum)
 	vec=getRowByNum(rowNum);
 }
 
+void GameField::deployCards(int id, int rowNum, std::vector<GameUnit *> *vec)
+{
+	//TODO
+}
+
 void GameField::deleteFromVector(GameUnit *target)
 {
 	std::vector<GameUnit*> *targetRow=getRowByNum(target->getRowNum());
@@ -646,7 +652,7 @@ void GameField::deleteFromVector(GameUnit *target)
 			break;
 		count++;
 	}
-	emit toBeDestroyed(target->getRowNum(),count,target->getSide());
+
 	targetRow->erase(it);
 }
 

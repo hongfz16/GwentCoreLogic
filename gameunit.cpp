@@ -10,6 +10,8 @@ GameUnit::GameUnit(int _cardId, QObject *parent) : QObject(parent),cardId(_cardI
     else type=false;
     protection=0;
     locked=false;
+	oldRowNum=0;
+	rowNum=0;
     qDebug()<<"Here";
     qDebug()<<name<<": "<<fight<<" "<<type<<" "<<protection<<" "<<locked;
 }
@@ -78,6 +80,7 @@ void GameUnit::setFightToN(int N)
 
 void GameUnit::setRowNum(int num)
 {
+	oldRowNum=rowNum;
 	rowNum=num;
 	emit stateChanged(this);
 }

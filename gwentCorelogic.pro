@@ -1,4 +1,5 @@
 QT += core
+QT += network
 QT -= gui
 
 CONFIG += c++11
@@ -15,7 +16,9 @@ SOURCES += main.cpp \
     gameunit.cpp \
     cardmanager.cpp \
     fieldmanager.cpp \
-    effectmanager.cpp
+effectmanager.cpp \
+mythread.cpp \
+gwentserver.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -35,7 +38,9 @@ HEADERS += \
     cardmanager.h \
     fieldmanager.h \
     effectmanager.h \
-    gameconstant.h
+gameconstant.h \
+mythread.h \
+gwentserver.h
 
 RESOURCES += \
     gwentresource.qrc

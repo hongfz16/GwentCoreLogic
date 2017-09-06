@@ -24,6 +24,7 @@ private:
     bool locked;
 
 	int rowNum;
+	int oldRowNum;
 	bool side;
 
 public:
@@ -33,6 +34,7 @@ public:
     int getProtection() const {return protection;}
     bool isLocked() const {return locked;}
 	int getRowNum() const {return rowNum;}
+	int getOldRowNum() const {return oldRowNum;}
 	int getSide() const {return side;}
 
     void decreaseFight(int num, bool protectionUnseen=false);

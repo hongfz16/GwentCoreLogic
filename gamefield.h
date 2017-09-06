@@ -16,6 +16,7 @@ public:
 signals:
 	void gameUnitChangedToClient(int rowNum,int index,bool side);
 	void toBeDestroyed(int rowNum,int index,bool side);
+	void newCardDeployed(int rowNum,int index,bool side);
 
 public slots:
 
@@ -78,6 +79,8 @@ public slots:
 
 	void getRow(std::vector<GameUnit*> *vec,int rowNum);
 
+	void deployCards(int id,int rowNum,std::vector<GameUnit*> *vec);
+
 private:
 	std::vector<GameUnit*> myHandCard;
 	std::vector<GameUnit*> opHandCard;
@@ -92,7 +95,7 @@ private:
 	std::vector<int> opBase;
     std::vector<int> myCemetery;
     std::vector<int> opCemetery;
-
+/*
 	unsigned int myPoint;
 	unsigned int opPoint;
 	unsigned int myFronPoint;
@@ -101,7 +104,7 @@ private:
 	unsigned int opFrontPoint;
 	unsigned int opMiddlePoint;
 	unsigned int opBackPoint;
-
+*/
 	void deleteFromVector(GameUnit *target);
 	void addToCemetery(int id, bool side);
 	void deleteFromHandCard(GameUnit *target);
@@ -112,7 +115,7 @@ private:
 	std::vector<int>* getCemeteryBySide(bool side);
 
 	void shuffleVec(std::vector<int>* vec);
-	void exchangeCards(int index, std::vector<GameUnit *> *handCard, std::vector<int> *base);
+	void exchangeCard(int index, std::vector<GameUnit *> *handCard, std::vector<int> *base);
 
 public:
     void setMyBase(std::vector<int>* _base);

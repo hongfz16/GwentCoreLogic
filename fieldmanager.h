@@ -6,6 +6,7 @@
 #include "effectmanager.h"
 #include "gamefield.h"
 #include "gameconstant.h"
+#include "mythread.h"
 #include <vector>
 #include <cstdlib>
 #include <ctime>
@@ -45,8 +46,19 @@ public slots:
 
 	void changeSide() {side=!side;}
 
+	int getFightFromVec(const std::vector<GameUnit *> *vec);
+
 public:
 	bool getSide() {return side;}
+
+	int getMyPoint();
+	int getOpPoint();
+	int getMyFrontPoint();
+	int getOpFrontPoint();
+	int getMyMiddlePoint();
+	int getOpMiddlePoint();
+	int getMyBackPoint();
+	int getOpBackPoint();
 
 };
 
