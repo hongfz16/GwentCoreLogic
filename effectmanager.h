@@ -6,8 +6,8 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QString>
-#include <cardmanager.h>
-#include <gameunit.h>
+#include "cardmanager.h"
+#include "gameunit.h"
 #include <vector>
 #include <map>
 

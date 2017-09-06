@@ -26,6 +26,8 @@ private:
     QJsonDocument *jsonFile;
     QJsonObject *jsonObject;
 
+	bool have(QString key);
+
 public:
     int getFight();
     QString getName();
@@ -33,6 +35,11 @@ public:
 	QJsonObject getRoutineEffect();
 	QJsonObject getDeadWishEffect();
 	QJsonObject getPrepare();
+	QJsonObject getPassiveEffect();
+	bool haveDeployEffect();
+	bool haveRoutineEffect();
+	bool haveDeadWishEffect();
+	bool havePassiveEffect();
 };
 
 #endif // CARDMANAGER_H

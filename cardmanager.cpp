@@ -28,6 +28,14 @@ CardManager::~CardManager()
 	delete(jsonObject);
 }
 
+bool CardManager::have(QString key)
+{
+	auto it=jsonObject->find(key);
+	if(it!=jsonObject->end())
+		return true;
+	return false;
+}
+
 int CardManager::getFight()
 {
     QJsonValue JVFight=jsonObject->value(QString("fight"));
@@ -62,5 +70,31 @@ QJsonObject CardManager::getPrepare()
 {
 	QJsonValue JVDeadWish=jsonObject->value(QString("Prepare"));
 	return JVDeadWish.toObject();
+}
+
+QJsonObject CardManager::getPassiveEffect()
+{
+	QJsonValue JVDeadWish=jsonObject->value(QString("PassiveEffect"));
+	return JVDeadWish.toObject();
+}
+
+bool CardManager::haveDeployEffect()
+{
+	return have(QString("DeployEffect"));
+}
+
+bool CardManager::haveRoutineEffect()
+{
+	return have(QString("RoutineEffect"));
+}
+
+bool CardManager::haveDeadWishEffect()
+{
+	return have(QString("DeadWish"));
+}
+
+bool CardManager::havePassiveEffect()
+{
+	return have(QString("PassiveEffect"));
 }
 

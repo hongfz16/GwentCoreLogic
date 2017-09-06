@@ -7,6 +7,7 @@ EffectManager::EffectManager(bool _side,GameUnit *target, int effectType, QObjec
 	/* effectType == 0 -> instant
 	 * effectType == 1 -> routine
 	 * effectType == 2 -> deadWish
+	 * effectType == 3 -> passive
 	 */
 	switch (effectType) {
 	case 0:
@@ -17,6 +18,8 @@ EffectManager::EffectManager(bool _side,GameUnit *target, int effectType, QObjec
 		break;
 	case 2:
 		effectJson=cm->getDeadWishEffect();
+	case 3:
+		effectJson=cm->getPassiveEffect();
 	default:
 		break;
 	}

@@ -5,7 +5,7 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
-#include <gameunit.h>
+#include "gameunit.h"
 
 class GameField : public QObject
 {
