@@ -144,7 +144,7 @@ std::vector<int> *GameField::getCemeteryBySide(bool side)
 //TODO
 void choseByPlayer(std::vector<GameUnit*>& vec, int numToChose)
 {
-
+//unneeded choose operation taken care of by effectmanager
 }
 
 

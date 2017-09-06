@@ -363,7 +363,6 @@ void EffectManager::implementEffect()
 {
 	if(!myTimerUp())
 		return;
-	//TODO
 	auto it=effectJson.find("condition");
 	if(it!=effectJson.end())
 	{

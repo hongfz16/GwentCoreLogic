@@ -83,7 +83,7 @@ private:
     std::vector<GameUnit*> opMiddle;
     std::vector<GameUnit*> opBack;
 
-    std::vector<int> myBase;
+	std::vector<int> myBase;
 	std::vector<int> opBase;
     std::vector<int> myCemetery;
     std::vector<int> opCemetery;
