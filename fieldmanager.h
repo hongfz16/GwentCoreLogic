@@ -2,6 +2,7 @@
 #define FIELDMANAGER_H
 
 #include <QObject>
+#include <QPair>
 #include "gameunit.h"
 #include "effectmanager.h"
 #include "gamefield.h"
@@ -33,25 +34,45 @@ private:
 	MyThread *myThread;
 	MyThread *opThread;
 
+	bool myPass;
+	bool opPass;
+	int myScore;
+	int opScore;
+	int round;
+
+
+
+
 public slots:
 	void implementInstant();
 	void implementRoutine();
+
+	//TODO
+	//need to add more signals to implement deadwish and passive
 	void implementDeadWish();
 	void implementPassive();
 
 	void shuffle();
 
-	void firstDraw();
-	void secondDraw();
-	void thirdDraw();
+	void firstDraw();//TODO
+	void secondDraw();//TODO
+	void thirdDraw();//TODO
 
-	void addEffect(int _id,GameUnit* target);
+	void newRound();//TODO
+	int settlement();//TODO
+	void gameOver();//TODO
+
+	void addEffect(int _id,GameUnit* target);//TODO
 
 	void changeTurn() {turn=!turn;}
 
 	int getFightFromVec(const std::vector<GameUnit *> *vec);
 
+	bool commonChooseCardAndDeploy(bool side);//TODO
 
+	void setPass(bool side);
+
+	void drawCards();
 
 public:
 	bool getTurn() {return turn;}
@@ -67,6 +88,12 @@ public:
 
 	void setMyThread(MyThread *th);
 	void setOpThread(MyThread *th);
+
+	bool isOtherPassed();
+
+	int getMyScore() {return myScore;}
+	int getOpScore() {return opScore;}
+	int getRound() {return round;}
 
 };
 

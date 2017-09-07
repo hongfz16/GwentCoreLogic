@@ -8,7 +8,7 @@ namespace CONSTANT {
 		gold,
 		sliver,
 		copper
-	}
+	};
 }
 
 

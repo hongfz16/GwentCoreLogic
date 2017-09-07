@@ -3,11 +3,19 @@
 
 #include <QObject>
 
+#include "fieldmanager.h"
+
 class GwentGame : public QObject
 {
 	Q_OBJECT
 public:
-        explicit GwentGame(QObject *parent = nullptr);
+	explicit GwentGame(QObject *parent = nullptr);
+
+	void startGame();
+
+
+private:
+	FieldManager *fm;
 
 signals:
 

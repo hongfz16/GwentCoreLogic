@@ -10,6 +10,11 @@ FieldManager::FieldManager(std::vector<int> *myBase, std::vector<int> *opBase, Q
 	srand((unsigned)time(NULL));
 	turn=(rand()%2==0) ? false:true;
 
+	myPass=false;
+	opPass=false;
+	myScore=0;
+	opScore=0;
+	round=1;
 }
 
 void FieldManager::implementInstant()
@@ -64,6 +69,32 @@ void FieldManager::secondDraw()
 }
 
 void FieldManager::thirdDraw()
+{
+
+}
+
+void FieldManager::newRound()
+{
+	implementDeadWish();
+	myPass=false;
+	opPass=false;
+}
+
+int FieldManager::settlement()
+{
+	//return 1 if my win
+	//return 2 if op win
+	//return 3 if draw
+	/* decide who wins
+	 * update myScore and opScore and round
+	 * destroy all units who is not locked
+	 * add all dead wishes of destroyed units to deadWish vector waiting for void newRound() to implement
+	 * send message to client telling them all units remaining on the field
+	 * send message to tell clients the current score
+	 */
+}
+
+void FieldManager::gameOver()
 {
 
 }
@@ -156,6 +187,36 @@ int FieldManager::getFightFromVec(const std::vector<GameUnit *> *vec)
 	return count;
 }
 
+bool FieldManager::commonChooseCardAndDeploy(bool side)
+{
+
+}
+
+void FieldManager::setPass(bool side)
+{
+	if(side)
+		myPass=true;
+	else
+		opPass=true;
+}
+
+void FieldManager::drawCards()
+{
+	switch (getRound()) {
+	case 1:
+		firstDraw();
+		break;
+	case 2:
+		secondDraw();
+		break;
+	case 3:
+		thirdDraw();
+		break;
+	default:
+		break;
+	}
+}
+
 int FieldManager::getMyPoint()
 {
 	int count=0;
@@ -222,4 +283,22 @@ void FieldManager::setOpThread(MyThread *th)
 	connect(myField,SIGNAL(rowChangedToClient(QJsonObject)),opThread,SLOT(sendQJsonObject(QJsonObject)));
 	connect(myField,SIGNAL(cemeteryChangedToClient(QJsonObject)),opThread,SLOT(sendQJsonObject(QJsonObject)));
 	connect(myField,SIGNAL(handCardChangedToClient(QJsonObject)),opThread,SLOT(sendQJsonObject(QJsonObject)));
+}
+
+bool FieldManager::isOtherPassed()
+{
+	if(turn)
+	{
+		if(opPass==false)
+			return false;
+		else
+			return true;
+	}
+	else
+	{
+		if(myPass==false)
+			return false;
+		else
+			return true;
+	}
 }
