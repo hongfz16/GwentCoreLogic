@@ -27,6 +27,7 @@ void MyThread::run()
     qDebug() << socketDescriptor << " Client connected";
 
     exec();
+
 }
 
 void MyThread::readyRead()
@@ -47,6 +48,12 @@ void MyThread::sendQJsonObject(QJsonObject info)
 {
 	QByteArray temp=QJsonDocument(info).toJson();
 	sendSomeData(&temp);
+}
+
+void MyThread::sendQJsonObjectAndWaitForRespode(QJsonObject *info)
+{
+	//TODO
+	//use waitforreadready function to wait for user responde and then modify the info ptr
 }
 
 void MyThread::parseQJsonObject(QJsonDocument JDData)

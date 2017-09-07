@@ -31,6 +31,8 @@ public slots:
 
 	void sendQJsonObject(QJsonObject info);
 
+	void sendQJsonObjectAndWaitForResponde(QJsonObject* info);
+
 private:
     qintptr socketDescriptor;
     QTcpSocket *socket;

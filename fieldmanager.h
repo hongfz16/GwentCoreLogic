@@ -12,6 +12,8 @@
 #include <cstdlib>
 #include <ctime>
 
+
+
 class FieldManager : public QObject
 {
 	Q_OBJECT
@@ -19,7 +21,10 @@ public:
 	explicit FieldManager(std::vector<int>* myBase,std::vector<int>* opBase,QObject *parent = nullptr);
 
 signals:
-
+	void effectChooseRowMyThread(QJsonObject*);
+	void effectChooseRowOpThread(QJsonObject*);
+	void effectChooseTargetMyThread(QJsonObject*);
+	void effectChooseTargetOpThread(QJsonObject*);
 
 private:
 	std::vector<EffectManager*> instantEffects;
@@ -73,6 +78,9 @@ public slots:
 	void setPass(bool side);
 
 	void drawCards();
+
+	void receiveEffectChooseRow(QJsonObject *info);
+	void receiveEffectChooseTarget(QJsonObject *info);
 
 public:
 	bool getTurn() {return turn;}

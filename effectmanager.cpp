@@ -29,23 +29,19 @@ EffectManager::EffectManager(bool _side,GameUnit *target, int effectType, QObjec
 
 std::vector<GameUnit *> *EffectManager::getTargetVec(QString key)
 {
-	auto it=vecMap.find(key);
-	if(it==vecMap.end())
+	if(key==QString("chooseTarget"))
 	{
-		if(key==QString("chooseTarget"))
-		{
-			vecMap["chooseTarget"]=chooseTarget();
-			return vecMap["chooseTarget"];
-		}
-		if(key==QString("chooseRow"))
-		{
-			std::vector<GameUnit*> *vec=nullptr;
-			getRow(vec,chooseRow());
-			vecMap["chooseRow"]=vec;
-			return vec;
-		}
-		return nullptr;
+		vecMap["chooseTarget"]=chooseTarget();
+		return vecMap["chooseTarget"];
 	}
+	if(key==QString("chooseRow"))
+	{
+		std::vector<GameUnit*> *vec=nullptr;
+		getRow(vec,chooseRow());
+		vecMap["chooseRow"]=vec;
+		return vec;
+	}
+	auto it=vecMap.find(key);
 	return it.value();
 }
 
@@ -54,6 +50,17 @@ int EffectManager::getTargetInt(QString key)
 	auto it=intMap.find(key);
 	if(it==intMap.end())
 		return -1;
+	return it.value();
+}
+
+GameUnit *EffectManager::getTargetUnit(QString key)
+{
+	if(key==QString("chooseTarget"))
+	{
+		unitMap["chooseTarget"]=(*chooseTarget())[0];
+		return unitMap["chooseTarget"];
+	}
+	auto it=unitMap.find(key);
 	return it.value();
 }
 
@@ -153,47 +160,47 @@ void EffectManager::implementFuntion(QJsonObject funcOb)
 	QJsonArray paraArray=funcOb["parameter"].toArray();
 	if(funcName==QString("damageByN"))
 	{
-		emit damageByN(vecMap[paraArray[0].toString()],intMap[paraArray[1].toString()]);
+		emit damageByN(getTargetVec(paraArray[0].toString()),intMap[paraArray[1].toString()]);
 		return;
 	}
 	if(funcName==QString("damageByNUnseenProtection"))
 	{
-		emit damageByNUnseenProtection(vecMap[paraArray[0].toString()],intMap[paraArray[1].toString()]);
+		emit damageByNUnseenProtection(getTargetVec(paraArray[0].toString()),intMap[paraArray[1].toString()]);
 		return;
 	}
 	if(funcName==QString("boostByN"))
 	{
-		emit boostByN(vecMap[paraArray[0].toString()],intMap[paraArray[1].toString()]);
+		emit boostByN(getTargetVec(paraArray[0].toString()),intMap[paraArray[1].toString()]);
 		return;
 	}
 	if(funcName==QString("addProtectionByN"))
 	{
-		emit addProtectionByN(vecMap[paraArray[0].toString()],intMap[paraArray[1].toString()]);
+		emit addProtectionByN(getTargetVec(paraArray[0].toString()),intMap[paraArray[1].toString()]);
 		return;
 	}
 	if(funcName==QString("lockTarget"))
 	{
-		emit lockTarget(vecMap[paraArray[0].toString()]);
+		emit lockTarget(getTargetVec(paraArray[0].toString()));
 		return;
 	}
 	if(funcName==QString("makePowerToN"))
 	{
-		emit makePowerToN(vecMap[paraArray[0].toString()],intMap[paraArray[1].toString()]);
+		emit makePowerToN(getTargetVec(paraArray[0].toString()),intMap[paraArray[1].toString()]);
 		return;
 	}
 	if(funcName==QString("destroyTarget"))
 	{
-		emit destroyTarget(vecMap[paraArray[0].toString()]);
+		emit destroyTarget(getTargetVec(paraArray[0].toString()));
 		return;
 	}
 	if(funcName==QString("eatTarget"))
 	{
-		emit eatTarget(vecMap[paraArray[0].toString()],self);
+		emit eatTarget(getTargetVec(paraArray[0].toString()),self);
 		return;
 	}
 	if(funcName==QString("moveTarget"))
 	{
-		emit moveTarget(vecMap[paraArray[0].toString()],intMap[paraArray[1].toString()]);
+		emit moveTarget(getTargetVec(paraArray[0].toString()),intMap[paraArray[1].toString()]);
 		return;
 	}
 	if(funcName==QString("peekNCardsFromBase"))
@@ -213,7 +220,7 @@ void EffectManager::implementFuntion(QJsonObject funcOb)
 	}
 	if(funcName==QString("putCardBackToBase"))
 	{
-		emit putCardBackToBase(unitMap[paraArray[0].toString()],intMap[paraArray[1].toString()],boolMap[paraArray[2].toString()]);
+		emit putCardBackToBase(getTargetUnit(paraArray[0].toString()),intMap[paraArray[1].toString()],boolMap[paraArray[2].toString()]);
 		return;
 	}
 	if(funcName==QString("resurrectCardToHand"))
@@ -227,13 +234,13 @@ void EffectManager::implementFuntion(QJsonObject funcOb)
 	}
 	if(funcName==QString("generateNCard"))
 	{
-		emit generateNCard(intMap[paraArray[0].toString()],intMap[paraArray[1].toString()],unitMap[paraArray[2].toString()],intMap[paraArray[3].toString()]);
+		emit generateNCard(intMap[paraArray[0].toString()],intMap[paraArray[1].toString()],getTargetUnit(paraArray[2].toString()),intMap[paraArray[3].toString()]);
 		return;
 	}
 
 	if(funcName==QString("getRow"))
 	{
-		emit getRow(vecMap[paraArray[0].toString()],intMap[paraArray[1].toString()]);
+		emit getRow(getTargetVec(paraArray[0].toString()),intMap[paraArray[1].toString()]);
 		return;
 	}
 
@@ -245,14 +252,14 @@ int EffectManager::transRowNum(QString rowInfo)
 		return self->getRowNum();
 	if(rowInfo=="oppositeRow")
 		return -(self->getRowNum());
-	if(rowInfo=="choose")
+	if(rowInfo=="chooseRow")
 		return chooseRow();
 	return -1;
 }
 
 void EffectManager::findTarget(QJsonObject JOFind)
 {
-	std::vector<GameUnit*> *vec=nullptr;
+	std::vector<GameUnit*> *vec=new std::vector<GameUnit*>();
 	QString paraNum=(JOFind["parameter"].toArray())[0].toString();
 	vecMap[paraNum]=vec;
 	int size=(JOFind["parameter"].toArray()).size();
@@ -288,7 +295,7 @@ void EffectManager::findTarget(QJsonObject JOFind)
 	if(funcName==QString("findNear"))
 	{
 		para2=transRowNum((JOFind["parameter"].toArray())[1].toString());
-		emit findNear(vec,para2,self,intMap[JAPara[3].toString()],intMap[JAPara[4].toString()]);
+		emit findNear(vec,para2,unitMap[JAPara[2].toString()],intMap[JAPara[3].toString()],intMap[JAPara[4].toString()]);
 		return;
 	}
 	if(funcName==QString("findWeakestInAll"))
@@ -392,10 +399,74 @@ void EffectManager::updateTimer()
 
 int EffectManager::chooseRow()
 {
-	//TODO
+	QJsonObject info;
+	QJsonArray arr;
+	if(cm->getPosition()==QString("anywhere"))
+	{
+		if(cm->getLoyalty() == side)
+		{
+			arr.append(1);
+			arr.append(2);
+			arr.append(3);
+		}
+		else
+		{
+			arr.append(-1);
+			arr.append(-2);
+			arr.append(-3);
+		}
+	}
+	else
+	{
+		int temp=cm->getPosition().toInt();
+		if(cm->getLoyalty() == side)
+			arr.append(temp);
+		else
+			arr.append(-temp);
+	}
+	info.insert("type","EffectChooseRow");
+	info.insert("rowRange",arr);
+	emit EffectChooseRow(&info);
+
+	return info["rowNum"].toInt();
 }
 
 std::vector<GameUnit *> *EffectManager::chooseTarget()
 {
-	//TODO
+	QJsonObject info;
+	QJsonArray arr;
+	if(cm->getPosition()==QString("anywhere"))
+	{
+		if(cm->getLoyalty() == side)
+		{
+			arr.append(1);
+			arr.append(2);
+			arr.append(3);
+		}
+		else
+		{
+			arr.append(-1);
+			arr.append(-2);
+			arr.append(-3);
+		}
+	}
+	else
+	{
+		int temp=cm->getPosition().toInt();
+		if(cm->getLoyalty() == side)
+			arr.append(temp);
+		else
+			arr.append(-temp);
+	}
+	info.insert("type","EffectChooseTarget");
+	info.insert("rowRange",arr);
+	emit EffectChooseTarget(&info);
+
+	int rowNum=info["rowNum"].toInt();
+	std::vector<GameUnit*> *tempVec=new std::vector<GameUnit*>();
+	emit getRow(tempVec,rowNum);
+	auto it=tempVec->begin()+info["index"].toInt();
+	std::vector<GameUnit*> *reVec=new std::vector<GameUnit*>();
+	reVec->push_back((*it));
+	return reVec;
 }

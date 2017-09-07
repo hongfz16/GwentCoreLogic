@@ -32,6 +32,9 @@ public:
     int getFight();
     QString getName();
 	int getType();
+	QString getPosition();
+	bool getLoyalty();
+
 	QJsonObject getDeployEffect();
 	QJsonObject getRoutineEffect();
 	QJsonObject getDeadWishEffect();

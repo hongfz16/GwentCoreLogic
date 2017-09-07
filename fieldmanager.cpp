@@ -82,6 +82,7 @@ void FieldManager::newRound()
 
 int FieldManager::settlement()
 {
+	//TODO
 	//return 1 if my win
 	//return 2 if op win
 	//return 3 if draw
@@ -96,7 +97,7 @@ int FieldManager::settlement()
 
 void FieldManager::gameOver()
 {
-
+//TODO
 }
 
 void FieldManager::addEffect(int _id,GameUnit *target)
@@ -175,6 +176,10 @@ void FieldManager::addEffect(int _id,GameUnit *target)
 
 	connect(em,SIGNAL(deployCardsFromBase(int,int,int,bool,int)),myField,SLOT(deployCardsFromBase(int,int,int,bool,int)));
 
+	connect(em,SIGNAL(EffectChooseRow(QJsonObject*)),this,SLOT(receiveEffectChooseRow(QJsonObject*)));
+
+	connect(em,SIGNAL(EffectChooseTarget(QJsonObject*)),this,SLOT(receiveEffectChooseTarget(QJsonObject*)));
+
 }
 
 int FieldManager::getFightFromVec(const std::vector<GameUnit *> *vec)
@@ -215,6 +220,22 @@ void FieldManager::drawCards()
 	default:
 		break;
 	}
+}
+
+void FieldManager::receiveEffectChooseRow(QJsonObject *info)
+{
+	if(turn)
+		emit effectChooseRowMyThread(info);
+	else
+		emit effectChooseRowOpThread(info);
+}
+
+void FieldManager::receiveEffectChooseTarget(QJsonObject *info)
+{
+	if(turn)
+		emit effectChooseTargetMyThread(info);
+	else
+		emit effectChooseTargetOpThread(info);
 }
 
 int FieldManager::getMyPoint()
@@ -273,6 +294,9 @@ void FieldManager::setMyThread(MyThread *th)
 	connect(myField,SIGNAL(rowChangedToClient(QJsonObject)),myThread,SLOT(sendQJsonObject(QJsonObject)));
 	connect(myField,SIGNAL(cemeteryChangedToClient(QJsonObject)),myThread,SLOT(sendQJsonObject(QJsonObject)));
 	connect(myField,SIGNAL(handCardChangedToClient(QJsonObject)),myThread,SLOT(sendQJsonObject(QJsonObject)));
+
+	connect(this,SIGNAL(effectChooseRowMyThread(QJsonObject*)),myThread,SLOT(sendQJsonObjectAndWaitForRespode(QJsonObject*)));
+	connect(this,SIGNAL(effectChooseTargetMyThread(QJsonObject*)),myThread,SLOT(sendQJsonObjectAndWaitForRespode(QJsonObject*)));
 }
 
 void FieldManager::setOpThread(MyThread *th)
@@ -283,6 +307,9 @@ void FieldManager::setOpThread(MyThread *th)
 	connect(myField,SIGNAL(rowChangedToClient(QJsonObject)),opThread,SLOT(sendQJsonObject(QJsonObject)));
 	connect(myField,SIGNAL(cemeteryChangedToClient(QJsonObject)),opThread,SLOT(sendQJsonObject(QJsonObject)));
 	connect(myField,SIGNAL(handCardChangedToClient(QJsonObject)),opThread,SLOT(sendQJsonObject(QJsonObject)));
+
+	connect(this,SIGNAL(effectChooseRowOpThread(QJsonObject*)),opThread,SLOT(sendQJsonObjectAndWaitForRespode(QJsonObject*)));
+	connect(this,SIGNAL(effectChooseTargetOpThread(QJsonObject*)),opThread,SLOT(sendQJsonObjectAndWaitForRespode(QJsonObject*)));
 }
 
 bool FieldManager::isOtherPassed()

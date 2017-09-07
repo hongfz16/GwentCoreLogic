@@ -54,6 +54,18 @@ int CardManager::getType()
 	return JVName.toInt();
 }
 
+QString CardManager::getPosition()
+{
+	QJsonValue JVName=jsonObject->value(QString("position"));
+	return JVName.toString();
+}
+
+bool CardManager::getLoyalty()
+{
+	QJsonValue JVName=jsonObject->value(QString("loyalty"));
+	return JVName.toBool();
+}
+
 QJsonObject CardManager::getDeployEffect()
 {
 	QJsonValue JVDeploy=jsonObject->value(QString("DeployEffect"));

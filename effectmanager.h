@@ -78,8 +78,7 @@ signals:
 
 	void getRow(std::vector<GameUnit*> *vec,int rowNum);
 
-	/***************/
-	//ADD
+
 	void deployCardsFromBase(int id,int rowNum,int index,bool side,int type);
 
 	void deployCards(GameUnit *unit, int rowNum, int index);
@@ -89,12 +88,9 @@ signals:
 
 	void resurrectCardToRow(int id, bool cemeterySide, int rowNum, int index, int type);//CHANGED
 
-	//DELETE
-	//void deployCards(GameUnit *unit, int rowNum, int index);
-	//void deployCards(GameUnit *unit, int rowNum, GameUnit *target);
-	//void generateNCard(int id,int rowNum,int index,int N);
-
-	/**************/
+	//ADD
+	void EffectChooseRow(QJsonObject *info);
+	void EffectChooseTarget(QJsonObject *info);
 
 private:
 	CardManager *cm;
@@ -114,6 +110,7 @@ private:
 
 	std::vector<GameUnit*> *getTargetVec(QString key);
 	int getTargetInt(QString key);
+	GameUnit *getTargetUnit(QString key);
 
 	int timer;
 
