@@ -48,6 +48,12 @@ QString CardManager::getName()
 	return JVName.toString();
 }
 
+int CardManager::getType()
+{
+	QJsonValue JVName=jsonObject->value(QString("type"));
+	return JVName.toInt();
+}
+
 QJsonObject CardManager::getDeployEffect()
 {
 	QJsonValue JVDeploy=jsonObject->value(QString("DeployEffect"));

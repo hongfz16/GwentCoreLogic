@@ -31,6 +31,7 @@ private:
 public:
     int getFight();
     QString getName();
+	int getType();
 	QJsonObject getDeployEffect();
 	QJsonObject getRoutineEffect();
 	QJsonObject getDeadWishEffect();

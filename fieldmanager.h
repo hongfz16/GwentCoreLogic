@@ -28,7 +28,10 @@ private:
 
 	GameField *myField;
 
-	bool side;
+	bool turn;
+
+	MyThread *myThread;
+	MyThread *opThread;
 
 public slots:
 	void implementInstant();
@@ -44,12 +47,14 @@ public slots:
 
 	void addEffect(int _id,GameUnit* target);
 
-	void changeSide() {side=!side;}
+	void changeTurn() {turn=!turn;}
 
 	int getFightFromVec(const std::vector<GameUnit *> *vec);
 
+
+
 public:
-	bool getSide() {return side;}
+	bool getTurn() {return turn;}
 
 	int getMyPoint();
 	int getOpPoint();
@@ -59,6 +64,9 @@ public:
 	int getOpMiddlePoint();
 	int getMyBackPoint();
 	int getOpBackPoint();
+
+	void setMyThread(MyThread *th);
+	void setOpThread(MyThread *th);
 
 };
 

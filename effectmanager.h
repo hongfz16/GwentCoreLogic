@@ -6,6 +6,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QString>
+#include <QMap>
 #include "cardmanager.h"
 #include "gameunit.h"
 #include <vector>
@@ -66,12 +67,12 @@ signals:
 	void moveTarget(std::vector<GameUnit*> *vec,int toRow);
 
 	void peekNCardsFromBase(int N, bool side);
-	void peekSpecificCardFromBase(int type,bool side);
 
+	void peekSpecificCardFromBase(int type,bool side);
 
 	void putCardBackToBase(GameUnit *unit, int type,bool side);
 
-	void resurrectCard(int id, bool cemeterySide,bool resurrectSide);
+	//void resurrectCard(int id, bool cemeterySide,bool resurrectSide);
 
 	void generateNCard(int id, int rowNum,GameUnit *target, int N);
 
@@ -79,7 +80,14 @@ signals:
 
 	/***************/
 	//ADD
-	void deployCards(int id,int rowNum,std::vector<GameUnit*> *vec);
+	void deployCardsFromBase(int id,int rowNum,int index,bool side,int type);
+
+	void deployCards(GameUnit *unit, int rowNum, int index);
+	void deployCards(GameUnit *unit, int rowNum, GameUnit *target);
+
+	void resurrectCardToHand(int id, bool cemeterySide,bool resurrectSide,int type);//CHANGED
+
+	void resurrectCardToRow(int id, bool cemeterySide, int rowNum, int index, int type);//CHANGED
 
 	//DELETE
 	//void deployCards(GameUnit *unit, int rowNum, int index);
@@ -96,13 +104,13 @@ private:
 	bool side;
 
 
-	std::map<QString,std::vector<GameUnit*>* > vecMap;
+	QMap<QString,std::vector<GameUnit*>* > vecMap;
 
-	std::map<QString,int> intMap;
+	QMap<QString,int> intMap;
 
-	std::map<QString,bool> boolMap;
+	QMap<QString,bool> boolMap;
 
-	std::map<QString,GameUnit*> unitMap;
+	QMap<QString,GameUnit*> unitMap;
 
 	std::vector<GameUnit*> *getTargetVec(QString key);
 	int getTargetInt(QString key);

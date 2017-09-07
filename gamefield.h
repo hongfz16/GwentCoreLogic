@@ -2,10 +2,14 @@
 #define GAMEFIELD_H
 
 #include <QObject>
+#include <QJsonObject>
+#include <QJsonArray>
 #include <vector>
 #include <cstdlib>
 #include <ctime>
 #include "gameunit.h"
+#include "gameconstant.h"
+#include "cardmanager.h"
 
 class GameField : public QObject
 {
@@ -14,13 +18,24 @@ public:
 	explicit GameField(QObject *parent = nullptr);
 
 signals:
-	void gameUnitChangedToClient(int rowNum,int index,bool side);
-	void toBeDestroyed(int rowNum,int index,bool side);
-	void newCardDeployed(int rowNum,int index,bool side);
+	void rowChanged(int rowNum);
+	void baseChanged(bool side);
+	void cemeteryChanged(bool side);
+	void handCardChanged(bool side);
+
+	void gameUnitChangedToClient(QJsonObject info);
+	void rowChangedToClient(QJsonObject info);
+	void baseChangedToClient(QJsonObject info);
+	void cemeteryChangedToClient(QJsonObject info);
+	void handCardChangedToClient(QJsonObject info);
 
 public slots:
 
 	void gameUnitChanged(GameUnit*target);
+	void rowChangedSlot(int rowNum);
+	void baseChangedSlot(bool side);
+	void cemeteryChangedSlot(bool side);
+	void handCardChangedSlot(bool side);
 
 	void findWeakestInRow(std::vector<GameUnit *> *vec, int rowNum);
 	void findWeakestInRow(std::vector<GameUnit*> *vec, int rowNum, int maxNum);
@@ -72,14 +87,16 @@ public slots:
 
 	void putCardBackToBase(GameUnit *unit, int type,bool side);
 
-	void resurrectCard(int id, bool cemeterySide,bool resurrectSide);
+	void resurrectCardToHand(int id, bool cemeterySide,bool resurrectSide,int type);//CHANGED
+
+	void resurrectCardToRow(int id, bool cemeterySide, int rowNum, int index, int type);//CHANGED
 
 	void generateNCard(int id,int rowNum,int index,int N);
 	void generateNCard(int id, int rowNum,GameUnit *target, int N);
 
 	void getRow(std::vector<GameUnit*> *vec,int rowNum);
 
-	void deployCards(int id,int rowNum,std::vector<GameUnit*> *vec);
+	void deployCardsFromBase(int id,int rowNum,int index,bool side,int type);
 
 private:
 	std::vector<GameUnit*> myHandCard;

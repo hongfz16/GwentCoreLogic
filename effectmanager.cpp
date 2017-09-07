@@ -46,7 +46,7 @@ std::vector<GameUnit *> *EffectManager::getTargetVec(QString key)
 		}
 		return nullptr;
 	}
-	return (*it).second;
+	return it.value();
 }
 
 int EffectManager::getTargetInt(QString key)
@@ -54,7 +54,7 @@ int EffectManager::getTargetInt(QString key)
 	auto it=intMap.find(key);
 	if(it==intMap.end())
 		return -1;
-	return (*it).second;
+	return it.value();
 }
 
 bool EffectManager::myTimerUp()
@@ -206,9 +206,9 @@ void EffectManager::implementFuntion(QJsonObject funcOb)
 		emit peekSpecificCardFromBase(intMap[paraArray[0].toString()],boolMap[paraArray[1].toString()]);
 		return;
 	}
-	if(funcName==QString("deployCards"))
+	if(funcName==QString("deployCardsFromBase"))
 	{
-		emit deployCards(intMap[paraArray[0].toString()],intMap[paraArray[1].toString()],vecMap[paraArray[0].toString()]);
+		emit deployCardsFromBase(intMap[paraArray[0].toString()],intMap[paraArray[1].toString()],intMap[paraArray[2].toString()],boolMap[paraArray[3].toString()],intMap[paraArray[4].toString()]);
 		return;
 	}
 	if(funcName==QString("putCardBackToBase"))
@@ -216,10 +216,14 @@ void EffectManager::implementFuntion(QJsonObject funcOb)
 		emit putCardBackToBase(unitMap[paraArray[0].toString()],intMap[paraArray[1].toString()],boolMap[paraArray[2].toString()]);
 		return;
 	}
-	if(funcName==QString("resurrectCard"))
+	if(funcName==QString("resurrectCardToHand"))
 	{
-		emit resurrectCard(intMap[paraArray[0].toString()],boolMap[paraArray[1].toString()],boolMap[paraArray[2].toString()]);
+		emit resurrectCardToHand(intMap[paraArray[0].toString()],boolMap[paraArray[1].toString()],boolMap[paraArray[2].toString()],intMap[paraArray[3].toString()]);
 		return;
+	}
+	if(funcName==QString("resurrectCardToRow"))
+	{
+		emit resurrectCardToRow(intMap[paraArray[0].toString()],boolMap[paraArray[1].toString()],intMap[paraArray[2].toString()],intMap[paraArray[3].toString()],intMap[paraArray[4].toString()]);
 	}
 	if(funcName==QString("generateNCard"))
 	{

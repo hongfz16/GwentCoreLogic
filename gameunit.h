@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QDebug>
 #include "cardmanager.h"
+#include "gameconstant.h"
 
 class GameUnit : public QObject
 {
@@ -26,6 +27,8 @@ private:
 	int rowNum;
 	int oldRowNum;
 	bool side;
+
+	CONSTANT::cardType myType;
 
 public:
     int getCardId() const {return cardId;}

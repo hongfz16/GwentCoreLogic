@@ -27,6 +27,7 @@ void GwentServer::incomingConnection(qintptr socketDescriptor)
 
     connect(thread,SIGNAL(finished()),thread,SLOT(deleteLater()));
     connect(thread,SIGNAL(needToRemoveFromMap(qintptr)),this,SLOT(removeThreadFromMap(qintptr)));
+	connect(thread,SIGNAL(sendSignalToServer(qintptr,QString)),this,SLOT(threadSendSignalToServer(qintptr,QString)));
 
     thread->start();
 }

@@ -8,7 +8,8 @@ FieldManager::FieldManager(std::vector<int> *myBase, std::vector<int> *opBase, Q
 	myField->setOpBase(opBase);
 
 	srand((unsigned)time(NULL));
-	side=(rand()%2==0) ? false:true;
+	turn=(rand()%2==0) ? false:true;
+
 }
 
 void FieldManager::implementInstant()
@@ -73,22 +74,22 @@ void FieldManager::addEffect(int _id,GameUnit *target)
 	EffectManager *em=nullptr;
 	if(cm.haveDeployEffect())
 	{
-		em=new EffectManager(side,target,0);
+		em=new EffectManager(turn,target,0);
 		instantEffects.push_back(em);
 	}
 	if(cm.haveRoutineEffect())
 	{
-		em=new EffectManager(side,target,1);
+		em=new EffectManager(turn,target,1);
 		routineEffects.push_back(em);
 	}
 	if(cm.haveDeadWishEffect())
 	{
-		em=new EffectManager(side,target,2);
+		em=new EffectManager(turn,target,2);
 		deadWish.push_back(em);
 	}
 	if(cm.havePassiveEffect())
 	{
-		em=new EffectManager(side,target,3);
+		em=new EffectManager(turn,target,3);
 		passiveEffects.push_back(em);
 	}
 	connect(em,SIGNAL(findWeakestInRow(std::vector<GameUnit*>*,int)),myField,SLOT(findWeakestInRow(std::vector<GameUnit*>*,int)));
@@ -133,13 +134,15 @@ void FieldManager::addEffect(int _id,GameUnit *target)
 
 	connect(em,SIGNAL(putCardBackToBase(GameUnit*,int,bool)),myField,SLOT(putCardBackToBase(GameUnit*,int,bool)));
 
-	connect(em,SIGNAL(resurrectCard(int,bool,bool)),myField,SLOT(resurrectCard(int,bool,bool)));
+	connect(em,SIGNAL(resurrectCardToHand(int,bool,bool,int)),myField,SLOT(resurrectCardToHand(int,bool,bool,int)));
+
+	connect(em,SIGNAL(resurrectCardToRow(int,bool,int,int,int)),myField,SLOT(resurrectCardToRow(int,bool,int,int,int)));
 
 	connect(em,SIGNAL(generateNCard(int,int,GameUnit*,int)),myField,SLOT(generateNCard(int,int,GameUnit*,int)));
 
 	connect(em,SIGNAL(getRow(std::vector<GameUnit*>*,int)),myField,SLOT(getRow(std::vector<GameUnit*>*,int)));
 
-	connect(em,SIGNAL(deployCards(int,int,std::vector<GameUnit*>*)),myField,SLOT(deployCards(int,int,std::vector<GameUnit*>*)));
+	connect(em,SIGNAL(deployCardsFromBase(int,int,int,bool,int)),myField,SLOT(deployCardsFromBase(int,int,int,bool,int)));
 
 }
 
@@ -199,4 +202,24 @@ int FieldManager::getMyBackPoint()
 int FieldManager::getOpBackPoint()
 {
 	return getFightFromVec(myField->getOpBack());
+}
+
+void FieldManager::setMyThread(MyThread *th)
+{
+	myThread=th;
+	connect(myField,SIGNAL(baseChangedToClient(QJsonObject)),myThread,SLOT(sendQJsonObject(QJsonObject)));
+	connect(myField,SIGNAL(gameUnitChangedToClient(QJsonObject)),myThread,SLOT(sendQJsonObject(QJsonObject)));
+	connect(myField,SIGNAL(rowChangedToClient(QJsonObject)),myThread,SLOT(sendQJsonObject(QJsonObject)));
+	connect(myField,SIGNAL(cemeteryChangedToClient(QJsonObject)),myThread,SLOT(sendQJsonObject(QJsonObject)));
+	connect(myField,SIGNAL(handCardChangedToClient(QJsonObject)),myThread,SLOT(sendQJsonObject(QJsonObject)));
+}
+
+void FieldManager::setOpThread(MyThread *th)
+{
+	opThread=th;
+	connect(myField,SIGNAL(baseChangedToClient(QJsonObject)),opThread,SLOT(sendQJsonObject(QJsonObject)));
+	connect(myField,SIGNAL(gameUnitChangedToClient(QJsonObject)),opThread,SLOT(sendQJsonObject(QJsonObject)));
+	connect(myField,SIGNAL(rowChangedToClient(QJsonObject)),opThread,SLOT(sendQJsonObject(QJsonObject)));
+	connect(myField,SIGNAL(cemeteryChangedToClient(QJsonObject)),opThread,SLOT(sendQJsonObject(QJsonObject)));
+	connect(myField,SIGNAL(handCardChangedToClient(QJsonObject)),opThread,SLOT(sendQJsonObject(QJsonObject)));
 }

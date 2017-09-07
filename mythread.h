@@ -6,6 +6,8 @@
 #include <QByteArray>
 #include <QDebug>
 #include <QObject>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 
 class MyThread : public QThread
@@ -18,15 +20,16 @@ public:
 signals:
     void error(QTcpSocket::SocketError socketError);
     void needToRemoveFromMap(qintptr id); //SLOT: GwentServer::removeThreadFromMap
-    void sendSignalToServer(qintptr id); //SLOT: GwentServer::threadSendSignalToServer
+
+	void sendSignalToServer(qintptr id,QString mess); //SLOT: GwentServer::threadSendSignalToServer
+	void sendSignalTogameField(QJsonObject info);
+	void sendSignalToController(bool side,QString mess);
 
 public slots:
     void readyRead();
     void disconnected();
 
-	//game involved slots
-	void gameUnitChanged(int rowNum,int index,bool side,QJsonObject unitInfo);
-	void toBeDestroyed(int rowNum,int index,bool side);
+	void sendQJsonObject(QJsonObject info);
 
 private:
     qintptr socketDescriptor;
@@ -42,6 +45,8 @@ private:
 	//game status
 	bool side;
 
+	void parseQJsonObject(QJsonDocument JDData);
+
 
 public:
     void dealWithData(QByteArray *data); // Called by void readyRead function
@@ -54,7 +59,7 @@ public:
 	QString getUserName() {return userName;}
 	int getUserId() {return userId;}
 
-	bool getSide() {if(isOnGame()) return side;}
+	bool getSide() {return side;}
 };
 
 #endif // MYTHREAD_H

@@ -14,6 +14,11 @@ GameField::GameField(QObject *parent) : QObject(parent)
 	opBase.clear();
     myCemetery.clear();
     opCemetery.clear();
+
+	connect(this,SIGNAL(rowChanged(int)),this,SLOT(rowChangedSlot(int)));
+	connect(this,SIGNAL(baseChanged(bool)),this,SLOT(baseChangedSlot(bool)));
+	connect(this,SIGNAL(cemeteryChanged(bool)),this,SLOT(cemeteryChangedSlot(bool)));
+	connect(this,SIGNAL(handCardChanged(bool)),this,SLOT(handCardChangedSlot(bool)));
 }
 
 void GameField::gameUnitChanged(GameUnit *target)
@@ -27,7 +32,74 @@ void GameField::gameUnitChanged(GameUnit *target)
 			break;
 		count++;
 	}
-	emit gameUnitChangedToClient(target->getOldRowNum(),count,target->getSide());
+	QJsonObject info;
+	info.insert("type","unitChanged");
+	info.insert("rowNum",target->getRowNum());
+	info.insert("index",count);
+	info.insert("fight",target->getFight());
+	info.insert("protection",target->getProtection());
+	info.insert("locked",target->isLocked());
+	emit gameUnitChangedToClient(info);
+}
+
+void GameField::rowChangedSlot(int rowNum)
+{
+	QJsonObject info;
+	QJsonArray arr;
+	std::vector<GameUnit*> *vec=getRowByNum(rowNum);
+	for(auto it=vec->begin();it!=vec->end();++it)
+	{
+		arr.append((*it)->getCardId());
+	}
+	info.insert("type","rowChanged");
+	info.insert("rowNum",rowNum);
+	info.insert("sequence",arr);
+	emit rowChangedToClient(info);
+}
+
+void GameField::baseChangedSlot(bool side)
+{
+	QJsonObject info;
+	QJsonArray arr;
+	std::vector<int> *vec=getBaseBySide(side);
+	for(auto it=vec->begin();it!=vec->end();++it)
+	{
+		arr.append((*it));
+	}
+	info.insert("type","baseChanged");
+	info.insert("side",side);
+	info.insert("sequence",arr);
+	emit baseChangedToClient(info);
+}
+
+void GameField::cemeteryChangedSlot(bool side)
+{
+	QJsonObject info;
+	QJsonArray arr;
+	std::vector<int> *vec=getCemeteryBySide(side);
+	for(auto it=vec->begin();it!=vec->end();++it)
+	{
+		arr.append((*it));
+	}
+	info.insert("type","cemeteryChanged");
+	info.insert("side",side);
+	info.insert("sequence",arr);
+	emit cemeteryChangedToClient(info);
+}
+
+void GameField::handCardChangedSlot(bool side)
+{
+	QJsonObject info;
+	QJsonArray arr;
+	std::vector<GameUnit*> *vec=getHandCardBySide(side);
+	for(auto it=vec->begin();it!=vec->end();++it)
+	{
+		arr.append((*it)->getCardId());
+	}
+	info.insert("type","handCardChanged");
+	info.insert("side",side);
+	info.insert("sequence",arr);
+	emit handCardChangedToClient(info);
 }
 
 void GameField::setMyBase(std::vector<int> *_base)
@@ -112,6 +184,8 @@ void GameField::exchangeCards(int index,bool side)
 	{
 		exchangeCard(index,&opHandCard,&opBase);
 	}
+	emit handCardChanged(side);
+	emit baseChanged(side);
 }
 
 std::vector<GameUnit *> *GameField::getRowByNum(int rowNum)
@@ -498,7 +572,6 @@ void GameField::destroyTarget(std::vector<GameUnit *> *vec)
 				break;
 			count++;
 		}
-		emit toBeDestroyed((*it)->getRowNum(),count,(*it)->getSide());
 		deleteFromVector((*it));
 		delete((*it));
 	}
@@ -520,6 +593,7 @@ void GameField::moveTarget(std::vector<GameUnit *> *vec, int toRow)
 		deleteFromVector((*it));
 		getRowByNum(toRow)->push_back((*it));
 		(*it)->setRowNum(toRow);
+		emit rowChanged(toRow);
 	}
 }
 
@@ -535,12 +609,29 @@ void GameField::peekNCardsFromBase(int N,bool side)
 		connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
 		getBaseBySide(side)->erase(it);
 	}
+	emit baseChanged(side);
+	emit handCardChanged(side);
 }
 
-//TODO
 void GameField::peekSpecificCardFromBase(int type,bool side)
 {
-
+	std::vector<int> *targetBase=getBaseBySide(side);
+	auto it=targetBase->begin();
+	for(;it!=targetBase->end();++it)
+	{
+		CardManager cm((*it));
+		if(cm.getType()==type)
+			break;
+	}
+	int id=*it;
+	targetBase->erase(it);
+	GameUnit *unit=new GameUnit(id);
+	unit->setRowNum(0);
+	unit->setSide(side);
+	getHandCardBySide(side)->push_back(unit);
+	connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
+	emit baseChanged(side);
+	emit handCardChanged(side);
 }
 
 void GameField::deployCards(GameUnit *unit, int rowNum, int index)
@@ -549,6 +640,7 @@ void GameField::deployCards(GameUnit *unit, int rowNum, int index)
 	std::vector<GameUnit*> *targetRow=getRowByNum(rowNum);
 	auto targetIt=targetRow->begin()+index;
 	targetRow->insert(targetIt,unit);
+	emit rowChanged(rowNum);
 }
 
 void GameField::deployCards(GameUnit *unit, int rowNum, GameUnit *target)
@@ -560,6 +652,7 @@ void GameField::deployCards(GameUnit *unit, int rowNum, GameUnit *target)
 		if((*targetIt)==target)
 			break;
 	targetRow->insert(targetIt,unit);
+	emit rowChanged(rowNum);
 }
 
 void GameField::putCardBackToBase(GameUnit *unit, int type,bool side)
@@ -584,23 +677,90 @@ void GameField::putCardBackToBase(GameUnit *unit, int type,bool side)
 	default:
 		break;
 	}
+	emit baseChanged(side);
 }
 
-void GameField::resurrectCard(int id, bool cemeterySide, bool resurrectSide)
+void GameField::resurrectCardToRow(int id, bool cemeterySide, int rowNum, int index,int type)
+{
+	std::vector<int> *targetCeme=getCemeteryBySide(cemeterySide);
+	std::vector<GameUnit*> *targetRow=getRowByNum(rowNum);
+	bool resurrectSide;
+	if(rowNum>0) resurrectSide=true;
+	else resurrectSide=false;
+	if(type==0) //resurrect all
+	{
+		int count=0;
+		for(auto it=targetCeme->begin();it!=targetCeme->end();++it)
+			if((*it)==id)
+			{
+				targetCeme->erase(it);
+				count++;
+			}
+		for(int i=0;i<count;++i)
+		{
+			GameUnit *unit=new GameUnit(id);
+			unit->setSide(resurrectSide);
+			unit->setRowNum(rowNum);
+			targetRow->insert(targetRow->begin()+index,unit);
+			connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
+		}
+	}
+	else
+	{
+		for(auto it=targetCeme->begin();it!=targetCeme->end();++it)
+			if((*it)==id)
+			{
+				targetCeme->erase(it);
+				break;
+			}
+		GameUnit *unit=new GameUnit(id);
+		unit->setSide(resurrectSide);
+		unit->setRowNum(rowNum);
+		targetRow->insert(targetRow->begin()+index,unit);
+		connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
+	}
+	emit cemeteryChanged(cemeterySide);
+	emit rowChanged(rowNum);
+}
+
+void GameField::resurrectCardToHand(int id, bool cemeterySide, bool resurrectSide,int type)
 {
 	std::vector<int> *targetCeme=getCemeteryBySide(cemeterySide);
 	std::vector<GameUnit*> *targetHand=getHandCardBySide(resurrectSide);
-	for(auto it=targetCeme->begin();it!=targetCeme->end();++it)
-		if((*it)==id)
+	if(type==0)
+	{
+		int count=0;
+		for(auto it=targetCeme->begin();it!=targetCeme->end();++it)
+			if((*it)==id)
+			{
+				targetCeme->erase(it);
+				count++;
+			}
+		for(int i=0;i<count;++i)
 		{
-			targetCeme->erase(it);
-			break;
+			GameUnit *unit=new GameUnit(id);
+			unit->setSide(resurrectSide);
+			unit->setRowNum(0);
+			targetHand->push_back(unit);
+			connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
 		}
-	GameUnit *unit=new GameUnit(id);
-	unit->setSide(resurrectSide);
-	unit->setRowNum(0);
-	targetHand->push_back(unit);
-	connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
+	}
+	else
+	{
+		for(auto it=targetCeme->begin();it!=targetCeme->end();++it)
+			if((*it)==id)
+			{
+				targetCeme->erase(it);
+				break;
+			}
+		GameUnit *unit=new GameUnit(id);
+		unit->setSide(resurrectSide);
+		unit->setRowNum(0);
+		targetHand->push_back(unit);
+		connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
+	}
+	emit cemeteryChanged(cemeterySide);
+	emit handCardChanged(resurrectSide);
 }
 
 void GameField::generateNCard(int id, int rowNum, int index, int N)
@@ -612,6 +772,7 @@ void GameField::generateNCard(int id, int rowNum, int index, int N)
 		GameUnit *unit=new GameUnit(id);
 		targetRow->insert(it,unit);
 	}
+	emit rowChanged(rowNum);
 }
 
 void GameField::generateNCard(int id, int rowNum, GameUnit *target, int N)
@@ -629,6 +790,7 @@ void GameField::generateNCard(int id, int rowNum, GameUnit *target, int N)
 		GameUnit *unit=new GameUnit(id);
 		targetRow->insert(it,unit);
 	}
+	emit rowChanged(rowNum);
 }
 
 void GameField::getRow(std::vector<GameUnit *> *vec, int rowNum)
@@ -636,9 +798,46 @@ void GameField::getRow(std::vector<GameUnit *> *vec, int rowNum)
 	vec=getRowByNum(rowNum);
 }
 
-void GameField::deployCards(int id, int rowNum, std::vector<GameUnit *> *vec)
+void GameField::deployCardsFromBase(int id, int rowNum, int index, bool side, int type)
 {
-	//TODO
+	std::vector<int> *targetBase=getBaseBySide(side);
+	std::vector<GameUnit*> *targetVec=getRowByNum(rowNum);
+	if(type==0)
+	{
+		int count=0;
+		for(auto it=targetBase->begin();it!=targetBase->end();++it)
+		{
+			if((*it)==id)
+			{
+				targetBase->erase(it);
+				count++;
+			}
+		}
+		for(int i=0;i<count;++i)
+		{
+			GameUnit *unit=new GameUnit(id);
+			unit->setSide(side);
+			unit->setRowNum(rowNum);
+			targetVec->insert(targetVec->begin()+index,unit);
+			connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
+		}
+	}
+	else
+	{
+		for(auto it=targetBase->begin();it!=targetBase->end();++it)
+		{
+			if((*it)==id)
+			{
+				targetBase->erase(it);
+				break;
+			}
+		}
+		GameUnit *unit=new GameUnit(id);
+		unit->setSide(side);
+		unit->setRowNum(rowNum);
+		targetVec->insert(targetVec->begin()+index,unit);
+		connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
+	}
 }
 
 void GameField::deleteFromVector(GameUnit *target)
@@ -652,7 +851,7 @@ void GameField::deleteFromVector(GameUnit *target)
 			break;
 		count++;
 	}
-
+	emit rowChanged(target->getRowNum());
 	targetRow->erase(it);
 }
 
@@ -668,6 +867,7 @@ void GameField::addToCemetery(int id,bool side)
 		auto it=opCemetery.begin();
 		opCemetery.insert(it,id);
 	}
+	emit cemeteryChanged(side);
 }
 
 void GameField::deleteFromHandCard(GameUnit *target)
@@ -678,5 +878,6 @@ void GameField::deleteFromHandCard(GameUnit *target)
 		if((*it)==target)
 			break;
 	}
+	emit handCardChanged(target->getSide());
 	getHandCardBySide(target->getSide())->erase(it);
 }

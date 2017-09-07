@@ -2,10 +2,22 @@
 
 GameUnit::GameUnit(int _cardId, QObject *parent) : QObject(parent),cardId(_cardId)
 {
-    CardManager *cm=new CardManager(_cardId);
+	CardManager *cm=new CardManager(_cardId);
     fight=cm->getFight();
     name=cm->getName();
-    delete(cm);
+	switch (cm->getType())
+	{
+	case 1:
+		myType=CONSTANT::gold;
+		break;
+	case 2:
+		myType=CONSTANT::sliver;
+		break;
+	case 3:
+		myType=CONSTANT::copper;
+		break;
+	}
+	delete(cm);
     if(fight) type=true;
     else type=false;
     protection=0;
@@ -82,11 +94,11 @@ void GameUnit::setRowNum(int num)
 {
 	oldRowNum=rowNum;
 	rowNum=num;
-	emit stateChanged(this);
+	//emit stateChanged(this);
 }
 
 void GameUnit::setSide(bool _side)
 {
 	side=_side;
-	emit stateChanged(this);
+	//emit stateChanged(this);
 }

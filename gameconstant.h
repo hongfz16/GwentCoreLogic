@@ -4,6 +4,11 @@
 namespace CONSTANT {
 	const int firstDrawNum=10;
 	const int firstExchangeNum=3;
+	enum cardType {
+		gold,
+		sliver,
+		copper
+	}
 }
 
 
