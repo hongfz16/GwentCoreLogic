@@ -31,8 +31,8 @@ void GwentGame::startGame()
 			}
 			else
 			{
-				fm->implementInstant();
-				fm->implementRoutine();
+				fm->implementInstant();//TODO ADD PASSIVE EFFECT CHECK
+				fm->implementRoutine();//TODO ADD PASSIVE EFFECT CHECK
 				if(!fm->isOtherPassed())
 					fm->changeTurn();
 			}

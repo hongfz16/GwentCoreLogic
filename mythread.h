@@ -9,6 +9,8 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 
+#include "gameconstant.h"
+
 
 class MyThread : public QThread
 {
@@ -32,6 +34,10 @@ public slots:
 	void sendQJsonObject(QJsonObject info);
 
 	void sendQJsonObjectAndWaitForResponde(QJsonObject* info);
+
+	void waitForDrawCard(QJsonObject* info);
+
+	void waitForDeploy(QJsonObject* info);
 
 private:
     qintptr socketDescriptor;

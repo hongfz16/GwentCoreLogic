@@ -66,6 +66,12 @@ bool CardManager::getLoyalty()
 	return JVName.toBool();
 }
 
+int CardManager::getTimer()
+{
+	QJsonValue JVName=jsonObject->value(QString("timer"));
+	return JVName.toInt();
+}
+
 QJsonObject CardManager::getDeployEffect()
 {
 	QJsonValue JVDeploy=jsonObject->value(QString("DeployEffect"));
@@ -90,9 +96,21 @@ QJsonObject CardManager::getPrepare()
 	return JVDeadWish.toObject();
 }
 
-QJsonObject CardManager::getPassiveEffect()
+QJsonObject CardManager::getDeployPassiveEffect()
 {
-	QJsonValue JVDeadWish=jsonObject->value(QString("PassiveEffect"));
+	QJsonValue JVDeadWish=jsonObject->value(QString("DeployPassiveEffect"));
+	return JVDeadWish.toObject();
+}
+
+QJsonObject CardManager::getBasePassiveEffect()
+{
+	QJsonValue JVDeadWish=jsonObject->value(QString("BasePassiveEffect"));
+	return JVDeadWish.toObject();
+}
+
+QJsonObject CardManager::getCemeteryPassiveEffect()
+{
+	QJsonValue JVDeadWish=jsonObject->value(QString("CemeteryPassiveEffect"));
 	return JVDeadWish.toObject();
 }
 
@@ -111,8 +129,18 @@ bool CardManager::haveDeadWishEffect()
 	return have(QString("DeadWish"));
 }
 
-bool CardManager::havePassiveEffect()
+bool CardManager::haveDeployPassiveEffect()
 {
-	return have(QString("PassiveEffect"));
+	return have(QString("DeployPassiveEffect"));
+}
+
+bool CardManager::haveBasePassiveEffect()
+{
+	return have(QString("BasePassiveEffect"));
+}
+
+bool CardManager::haveCemeteryPassiveEffect()
+{
+	return have(QString("CemeteryPassiveEffect"));
 }
 

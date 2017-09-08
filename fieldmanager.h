@@ -30,7 +30,9 @@ private:
 	std::vector<EffectManager*> instantEffects;
 	std::vector<EffectManager*> routineEffects;
 	std::vector<EffectManager*> deadWish;
-	std::vector<EffectManager*> passiveEffects;
+	std::vector<EffectManager*> deployPassiveEffects;
+	std::vector<EffectManager*> basePassiveEffects;
+	std::vector<EffectManager*> cemeteryPassiveEffects;
 
 	GameField *myField;
 
@@ -46,8 +48,6 @@ private:
 	int round;
 
 
-
-
 public slots:
 	void implementInstant();
 	void implementRoutine();
@@ -55,7 +55,10 @@ public slots:
 	//TODO
 	//need to add more signals to implement deadwish and passive
 	void implementDeadWish();
-	void implementPassive();
+	void implementUnitDeadWish(GameUnit *unit);
+	void implementDeployPassive();
+	void implementBasePassive();
+	void implementCemeteryPassive();
 
 	void shuffle();
 
@@ -67,7 +70,11 @@ public slots:
 	int settlement();//TODO
 	void gameOver();//TODO
 
-	void addEffect(int _id,GameUnit* target);//TODO
+	void addEffect(int _id, GameUnit* target, int type);//TODO
+
+	void initBaseEffect(int _id, bool side);
+
+	void deleteEffect(int effectType, int id, GameUnit* unit);
 
 	void changeTurn() {turn=!turn;}
 
@@ -81,6 +88,9 @@ public slots:
 
 	void receiveEffectChooseRow(QJsonObject *info);
 	void receiveEffectChooseTarget(QJsonObject *info);
+
+	void newCardDeployed(GameUnit *unit);
+	void cardDestroyed(GameUnit *unit);
 
 public:
 	bool getTurn() {return turn;}

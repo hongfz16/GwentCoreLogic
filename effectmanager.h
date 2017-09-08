@@ -16,7 +16,7 @@ class EffectManager : public QObject
 {
 	Q_OBJECT
 public:
-	explicit EffectManager(bool _side, GameUnit *target, int effectType, QObject *parent = nullptr);
+	explicit EffectManager(int id, bool _side, GameUnit *target, int effectType, QObject *parent = nullptr);
 
 signals:
 
@@ -99,6 +99,9 @@ private:
 
 	bool side;
 
+	int unitId;
+
+	bool needTimer;
 
 	QMap<QString,std::vector<GameUnit*>* > vecMap;
 
@@ -138,11 +141,15 @@ private:
 	void prepare();
 
 public slots:
-	void implementEffect();
-	void updateTimer();
+	void implementEffect(bool turn);
+	void updateTimer();//before implement
+	void resetTimer();//after implement
 
-	int chooseRow(); //TODO UI RELATED
+	int chooseRow();
 	std::vector<GameUnit*> *chooseTarget();
+
+	GameUnit* getSelf() {return self;}
+	int getUnitId() {return unitId;}
 };
 
 #endif // EFFECTMANAGER_H

@@ -50,28 +50,151 @@ void MyThread::sendQJsonObject(QJsonObject info)
 	sendSomeData(&temp);
 }
 
-void MyThread::sendQJsonObjectAndWaitForRespode(QJsonObject *info)
+void MyThread::sendQJsonObjectAndWaitForResponde(QJsonObject *info)
 {
-	//TODO
-	//use waitforreadready function to wait for user responde and then modify the info ptr
+	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
+	sendQJsonObject(*info);
+	int millisec=(*info)["wait"].toInt()*CONSTANT::millisecPerSec;
+	if(!socket->waitForReadyRead(millisec+CONSTANT::connectBreakJudge)) //need to improve//TODO
+	{
+		info->insert("error","connection broken");
+		qDebug()<<"Connection broken!"<<side;
+		/*
+		QJsonObject timeout;
+		timeout.insert("type","command");
+		timeout.insert("commands","cancel");
+		sendQJsonObject(timeout);
+		*/
+	}
+	else
+	{
+		QByteArray data=socket->readAll();
+		QJsonDocument temp;
+		temp.fromJson(data);
+		QJsonObject infoBack=temp.object();
+		QString to=infoBack["to"].toString();
+		if(to==QString("Field"))
+		{
+			if(infoBack.find("timeout")!=infoBack.end())
+				info->insert("exception","timeout");
+			if(infoBack.find("rowNum")!=infoBack.end())
+				info->insert("rowNum",infoBack["rowNum"]);
+			if(infoBack.find("index")!=infoBack.end())
+				info->insert("index",infoBack["index"]);
+		}
+		if(to==QString("Controller"))
+		{
+			QString mess=infoBack["Message"].toString();
+			emit sendSignalToController(side,mess);
+		}
+	}
+	connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()), Qt::DirectConnection);
+}
+
+void MyThread::waitForDrawCard(QJsonObject *info)
+{
+	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
+
+	//sendQJsonObject(*info);
+	int millisec=(*info)["wait"].toInt()*CONSTANT::millisecPerSec;
+	if(!socket->waitForReadyRead(millisec+CONSTANT::connectBreakJudge))
+	{
+		info->insert("error","connection broken");
+		qDebug()<<"Connection broken!"<<side;
+	}
+	else
+	{
+		QByteArray data=socket->readAll();
+		QJsonDocument temp;
+		temp.fromJson(data);
+		QJsonObject infoBack=temp.object();
+		QString to=infoBack["to"].toString();
+		if(to==QString("Field"))
+		{
+			if(infoBack.find("timeout")!=infoBack.end())
+				info->insert("exception","timeout");
+			if(infoBack.find("hand")!=infoBack.end())
+			{
+				info->insert("hand",infoBack["hand"]);
+			}
+			if(infoBack.find("base")!=infoBack.end())
+			{
+				info->insert("base",infoBack["base"]);
+			}
+		}
+		if(to==QString("Controller"))
+		{
+			QString mess=infoBack["Message"].toString();
+			emit sendSignalToController(side,mess);
+		}
+	}
+
+	connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()), Qt::DirectConnection);
+}
+
+void MyThread::waitForDeploy(QJsonObject *info)
+{
+	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
+
+	sendQJsonObject(*info);
+	int millisec=(*info)["wait"].toInt()*CONSTANT::millisecPerSec;
+	if(!socket->waitForReadyRead(millisec+CONSTANT::connectBreakJudge))
+	{
+		info->insert("error","conection broken");
+		qDebug()<<"Connection broken!"<<side;
+	}
+	else
+	{
+		QByteArray data=socket->readAll();
+		QJsonDocument temp;
+		temp.fromJson(data);
+		QJsonObject infoBack=temp.object();
+		QString to=infoBack["to"].toString();
+		if(to==QString("Field"))
+		{
+			if(infoBack.find("timeout")!=infoBack.end())
+			{
+				info->insert("exception","timeout");
+			}
+			if(infoBack.find("handCardIndex")!=infoBack.end())
+			{
+				info->insert("handCardIndex",infoBack["handCardIndex"]);
+			}
+			if(infoBack.find("rowNum")!=infoBack.end())
+			{
+				info->insert("rowNum",infoBack["rowNum"]);
+			}
+			if(infoBack.find("index")!=infoBack.end())
+			{
+				info->insert("index",infoBack["index"]);
+			}
+		}
+		if(to==QString("Controller"))
+		{
+			QString mess=infoBack["Message"].toString();
+			emit sendSignalToController(side,mess);
+		}
+	}
+
+	connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()), Qt::DirectConnection);
 }
 
 void MyThread::parseQJsonObject(QJsonDocument JDData)
 {
 	QJsonObject JOData=JDData.object();
 	QString to=JOData["to"].toString();
-	if(to=="Server")
+	if(to==QString("Server"))
 	{
 		QString mess=JOData["Message"].toString();
 		emit sendSignalToServer(socketDescriptor,mess);
 		return;
 	}
-	if(to=="Field")
+	if(to==QString("Field"))
 	{
 		emit sendSignalTogameField(JOData);
 		return;
 	}
-	if(to=="Controller")
+	if(to==QString("Controller"))
 	{
 		QString mess=JOData["Message"].toString();
 		emit sendSignalToController(side,mess);

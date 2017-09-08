@@ -34,16 +34,21 @@ public:
 	int getType();
 	QString getPosition();
 	bool getLoyalty();
+	int getTimer();
 
 	QJsonObject getDeployEffect();
 	QJsonObject getRoutineEffect();
 	QJsonObject getDeadWishEffect();
 	QJsonObject getPrepare();
-	QJsonObject getPassiveEffect();
+	QJsonObject getDeployPassiveEffect();
+	QJsonObject getBasePassiveEffect();
+	QJsonObject getCemeteryPassiveEffect();
 	bool haveDeployEffect();
 	bool haveRoutineEffect();
 	bool haveDeadWishEffect();
-	bool havePassiveEffect();
+	bool haveDeployPassiveEffect();
+	bool haveBasePassiveEffect();
+	bool haveCemeteryPassiveEffect();
 };
 
 #endif // CARDMANAGER_H

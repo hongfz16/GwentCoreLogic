@@ -270,15 +270,17 @@ void GameField::shuffleVec(std::vector<int> *vec)
 	}
 }
 
-void GameField::exchangeCard(int index,std::vector<GameUnit*> *handCard,std::vector<int> *base)
+int GameField::exchangeCard(int index,std::vector<GameUnit*> *handCard,std::vector<int> *base)
 {
 	int id=(*handCard)[index]->getCardId();
 	delete((*handCard)[index]);
 	(*handCard)[index]=new GameUnit(*(base->rend()));
-	base->pop_back();
+	auto itt=base->begin();
+	base->erase(itt);
 	srand((unsigned)time(NULL));
 	auto it=base->begin()+(rand()%static_cast<int>(base->size()));
 	base->insert(it,id);
+	return (*handCard)[index]->getCardId();
 }
 
 
@@ -573,6 +575,7 @@ void GameField::destroyTarget(std::vector<GameUnit *> *vec)
 			count++;
 		}
 		deleteFromVector((*it));
+		emit cardDestroyed((*it));
 		delete((*it));
 	}
 }
@@ -641,6 +644,7 @@ void GameField::deployCards(GameUnit *unit, int rowNum, int index)
 	auto targetIt=targetRow->begin()+index;
 	targetRow->insert(targetIt,unit);
 	emit rowChanged(rowNum);
+	emit newCardDeployed(unit);
 }
 
 void GameField::deployCards(GameUnit *unit, int rowNum, GameUnit *target)
@@ -653,6 +657,7 @@ void GameField::deployCards(GameUnit *unit, int rowNum, GameUnit *target)
 			break;
 	targetRow->insert(targetIt,unit);
 	emit rowChanged(rowNum);
+	emit newCardDeployed(unit);
 }
 
 void GameField::putCardBackToBase(GameUnit *unit, int type,bool side)
@@ -703,6 +708,7 @@ void GameField::resurrectCardToRow(int id, bool cemeterySide, int rowNum, int in
 			unit->setRowNum(rowNum);
 			targetRow->insert(targetRow->begin()+index,unit);
 			connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
+			emit newCardDeployed(unit);
 		}
 	}
 	else
@@ -718,6 +724,7 @@ void GameField::resurrectCardToRow(int id, bool cemeterySide, int rowNum, int in
 		unit->setRowNum(rowNum);
 		targetRow->insert(targetRow->begin()+index,unit);
 		connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
+		emit newCardDeployed(unit);
 	}
 	emit cemeteryChanged(cemeterySide);
 	emit rowChanged(rowNum);
@@ -771,6 +778,8 @@ void GameField::generateNCard(int id, int rowNum, int index, int N)
 		auto it=targetRow->begin()+index;
 		GameUnit *unit=new GameUnit(id);
 		targetRow->insert(it,unit);
+		connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
+		emit newCardDeployed(unit);
 	}
 	emit rowChanged(rowNum);
 }
@@ -789,6 +798,8 @@ void GameField::generateNCard(int id, int rowNum, GameUnit *target, int N)
 
 		GameUnit *unit=new GameUnit(id);
 		targetRow->insert(it,unit);
+		connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
+		emit newCardDeployed(unit);
 	}
 	emit rowChanged(rowNum);
 }
@@ -820,6 +831,7 @@ void GameField::deployCardsFromBase(int id, int rowNum, int index, bool side, in
 			unit->setRowNum(rowNum);
 			targetVec->insert(targetVec->begin()+index,unit);
 			connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
+			emit newCardDeployed(unit);
 		}
 	}
 	else
@@ -837,6 +849,7 @@ void GameField::deployCardsFromBase(int id, int rowNum, int index, bool side, in
 		unit->setRowNum(rowNum);
 		targetVec->insert(targetVec->begin()+index,unit);
 		connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
+		emit newCardDeployed(unit);
 	}
 }
 

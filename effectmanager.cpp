@@ -1,13 +1,17 @@
 #include "effectmanager.h"
 
-EffectManager::EffectManager(bool _side,GameUnit *target, int effectType, QObject *parent) : QObject(parent), self(target),side(_side)
+EffectManager::EffectManager(int id, bool _side, GameUnit *target, int effectType, QObject *parent) : QObject(parent), self(target),side(_side)
 {
 	cm=new CardManager(target->getCardId());
 	timer=0;
+	unitId=id;
+	needTimer=false;
 	/* effectType == 0 -> instant
 	 * effectType == 1 -> routine
 	 * effectType == 2 -> deadWish
-	 * effectType == 3 -> passive
+	 * effectType == 3 -> deploypassive
+	 * effectType == 4 -> basePassive
+	 * effectType == 5 -> cemeteryPassive
 	 */
 	switch (effectType) {
 	case 0:
@@ -15,11 +19,21 @@ EffectManager::EffectManager(bool _side,GameUnit *target, int effectType, QObjec
 		break;
 	case 1:
 		effectJson=cm->getRoutineEffect();
+		timer=cm->getTimer();
+		needTimer=true;
 		break;
 	case 2:
 		effectJson=cm->getDeadWishEffect();
+		break;
 	case 3:
-		effectJson=cm->getPassiveEffect();
+		effectJson=cm->getDeployPassiveEffect();
+		break;
+	case 4:
+		effectJson=cm->getBasePassiveEffect();
+		break;
+	case 5:
+		effectJson=cm->getCemeteryPassiveEffect();
+		break;
 	default:
 		break;
 	}
@@ -370,8 +384,10 @@ void EffectManager::prepare()
 	}
 }
 
-void EffectManager::implementEffect()
+void EffectManager::implementEffect(bool turn)
 {
+	if(side!=turn)
+		return;
 	if(!myTimerUp())
 		return;
 	auto it=effectJson.find("condition");
@@ -394,7 +410,14 @@ void EffectManager::implementEffect()
 
 void EffectManager::updateTimer()
 {
-	--timer;
+	if(needTimer)
+		--timer;
+}
+
+void EffectManager::resetTimer()
+{
+	if(needTimer)
+		timer=cm->getTimer();
 }
 
 int EffectManager::chooseRow()
@@ -426,6 +449,7 @@ int EffectManager::chooseRow()
 	}
 	info.insert("type","EffectChooseRow");
 	info.insert("rowRange",arr);
+	info.insert("wait",CONSTANT::waitForEffectTargetChoose);
 	emit EffectChooseRow(&info);
 
 	return info["rowNum"].toInt();
@@ -460,6 +484,7 @@ std::vector<GameUnit *> *EffectManager::chooseTarget()
 	}
 	info.insert("type","EffectChooseTarget");
 	info.insert("rowRange",arr);
+	info.insert("wait",CONSTANT::waitForEffectTargetChoose);
 	emit EffectChooseTarget(&info);
 
 	int rowNum=info["rowNum"].toInt();
