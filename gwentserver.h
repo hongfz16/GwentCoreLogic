@@ -29,10 +29,14 @@ private:
 
 	std::vector<GwentGame*> gameManager;
 
-	void myPair();
+
 
 public:
     void addThreadToMap(qintptr ID,MyThread *thread);
+
+#ifdef DEBUG
+	void myPair();
+#endif
 };
 
 #endif // GWENTSERVER_H

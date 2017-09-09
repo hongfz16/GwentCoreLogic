@@ -117,6 +117,10 @@ public:
 	void d_printAll();
 	void d_printRow(int rowNum);
 	void d_printUnit(GameUnit* unit);
+	void d_printCard(int id);
+	void d_printHand(bool side);
+	void d_printCemetery(bool side);
+	void d_printBase(bool side);
 #endif
 };
 

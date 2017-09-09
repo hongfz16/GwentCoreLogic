@@ -31,9 +31,6 @@ void GwentServer::incomingConnection(qintptr socketDescriptor)
 
 	thread->start();
 
-#ifdef DEBUG
-	myPair();
-#endif
 }
 
 void GwentServer::removeThreadFromMap(qintptr id)
@@ -50,9 +47,14 @@ void GwentServer::threadSendSignalToServer(qintptr id, QString mess)
 void GwentServer::myPair()
 {
 #ifdef DEBUG
-	if(idThreadMap.size()==2)
+	if(idThreadMap.size()>=2)
 	{
-		GwentGame *d_game=new GwentGame();
+		auto it=idThreadMap.begin();
+		MyThread *myThread=it->second;
+		it++;
+		MyThread *opThread=(it)->second;
+		GwentGame *d_game=new GwentGame(myThread,opThread);
+		d_game->startGame();
 	}
 #endif
 }

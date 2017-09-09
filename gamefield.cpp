@@ -19,9 +19,6 @@ GameField::GameField(QObject *parent) : QObject(parent)
 	connect(this,SIGNAL(baseChanged(bool)),this,SLOT(baseChangedSlot(bool)));
 	connect(this,SIGNAL(cemeteryChanged(bool)),this,SLOT(cemeteryChangedSlot(bool)));
 	connect(this,SIGNAL(handCardChanged(bool)),this,SLOT(handCardChangedSlot(bool)));
-
-	connect(this,SIGNAL(newCardDeployed(GameUnit*)),this,SLOT(newCardDeployedToQJsonObject(GameUnit*)));
-	connect(this,SIGNAL(cardDestroyed(GameUnit*)),this,SLOT(cardDestroyedToQJsonObject(GameUnit*)));
 }
 
 void GameField::gameUnitChanged(GameUnit *target)
@@ -163,6 +160,16 @@ const std::vector<int> *GameField::getMyCemetery()
 const std::vector<int> *GameField::getOpCemetery()
 {
 	return &opCemetery;
+}
+
+const std::vector<int> *GameField::getMyBase()
+{
+	return &myBase;
+}
+
+const std::vector<int> *GameField::getOpBase()
+{
+	return &opBase;
 }
 
 void GameField::shuffle()
@@ -879,12 +886,12 @@ void GameField::deployCardsFromBase(int id, int rowNum, int index, bool side, in
 
 void GameField::roundClear()
 {
-	clearRow(opBack);
-	clearRow(opMiddle);
-	clearRow(opFront);
-	clearRow(myBack);
-	clearRow(myMiddle);
-	clearRow(myFront);
+	clearRow(&opBack);
+	clearRow(&opMiddle);
+	clearRow(&opFront);
+	clearRow(&myBack);
+	clearRow(&myMiddle);
+	clearRow(&myFront);
 }
 
 void GameField::clearRow(std::vector<GameUnit *> *row)

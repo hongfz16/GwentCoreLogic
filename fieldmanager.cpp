@@ -152,13 +152,21 @@ void FieldManager::secondDraw()
 	{
 		//TODO
 	}
+#ifdef DEBUG
+	else if(myInfo.find("cancel")!=myInfo.end() &&opInfo.find("cancel")!=opInfo.end())
+	{
+		return;
+	}
+#endif
+#ifndef DEBUG
 	else
 	{
-		myField->updateHandCard(true,&myInfo);
-		myField->updateHandCard(false,&opInfo);
-		myField->updateBase(true,&myInfo);
-		myField->updateBase(false,&opInfo);
+		myField->updateHandCard(true,&myInfo);//TODO addfunc
+		myField->updateHandCard(false,&opInfo);//TODO
+		myField->updateBase(true,&myInfo);//TODO
+		myField->updateBase(false,&opInfo);//TODO
 	}
+#endif
 }
 
 void FieldManager::thirdDraw()
@@ -180,13 +188,21 @@ void FieldManager::thirdDraw()
 	{
 		//TODO
 	}
+#ifdef DEBUG
+	else if(myInfo.find("cancel")!=myInfo.end() &&opInfo.find("cancel")!=opInfo.end())
+	{
+		return;
+	}
+#endif
+#ifndef DEBUG
 	else
 	{
-		myField->updateHandCard(true,&myInfo);
-		myField->updateHandCard(false,&opInfo);
-		myField->updateBase(true,&myInfo);
-		myField->updateBase(false,&opInfo);
+		myField->updateHandCard(true,&myInfo);//TODO addfunc
+		myField->updateHandCard(false,&opInfo);//TODO
+		myField->updateBase(true,&myInfo);//TODO
+		myField->updateBase(false,&opInfo);//TODO
 	}
+#endif
 }
 
 void FieldManager::newRound()
@@ -491,11 +507,11 @@ bool FieldManager::commonChooseCardAndDeploy(bool side)
 		GameUnit *target=nullptr;
 		if(side)
 		{
-			target=(myField->getMyHandCard())[handIndex];
+			target=(*(myField->getMyHandCard()))[handIndex];
 		}
 		else
 		{
-			target=(myField->getOpHandCard())[handIndex];
+			target=(*(myField->getOpHandCard()))[handIndex];
 		}
 		int infoRowNum=info["rowNum"].toInt();
 		int infoIndex=info["index"].toInt();
@@ -674,11 +690,19 @@ void FieldManager::d_printAll()
 	qDebug()<<"op back:";
 	qDebug()<<"    point: "<<getOpBackPoint();
 	d_printRow(-3);
+	qDebug()<<"my handcard";
+	d_printHand(true);
+	qDebug()<<"op handcard";
+	d_printHand(false);
+	qDebug()<<"my cemetery";
+	d_printCemetery(true);
+	qDebug()<<"op cemetery";
+	d_printCemetery(false);
 }
 
 void FieldManager::d_printRow(int rowNum)
 {
-	std::vector<GameUnit*> *target=nullptr;
+	const std::vector<GameUnit*> *target=nullptr;
 	switch(rowNum)
 	{
 	case 1:
@@ -715,5 +739,67 @@ void FieldManager::d_printUnit(GameUnit *unit)
 	qDebug()<<"        fight: "<<unit->getFight();
 	qDebug()<<"        protection: "<<unit->getProtection();
 	qDebug()<<"    }";
+}
+
+void FieldManager::d_printCard(int id)
+{
+	CardManager cm(id);
+	qDebug()<<"    {";
+	qDebug()<<"        id: "<<id;
+	qDebug()<<"        name: "<<cm.getName();
+	qDebug()<<"        type: "<<cm.getType();
+	qDebug()<<"        fight: "<<cm.getFight();
+	qDebug()<<"    }";
+}
+
+void FieldManager::d_printHand(bool side)
+{
+	const std::vector<GameUnit*> *target=nullptr;
+	if(side)
+	{
+		target=myField->getMyHandCard();
+	}
+	else
+	{
+		target=myField->getOpHandCard();
+	}
+	for(auto it=target->begin();it!=target->end();++it)
+	{
+		d_printUnit(*it);
+	}
+}
+
+void FieldManager::d_printCemetery(bool side)
+{
+	const std::vector<int> *target=nullptr;
+	if(side)
+	{
+		target=myField->getMyCemetery();
+	}
+	else
+	{
+		target=myField->getOpCemetery();
+	}
+	for(auto it=target->begin();it!=target->end();++it)
+	{
+		d_printCard(*it);
+	}
+}
+
+void FieldManager::d_printBase(bool side)
+{
+	const std::vector<int> *target=nullptr;
+	if(side)
+	{
+		target=myField->getMyBase();
+	}
+	else
+	{
+		target=myField->getOpBase();
+	}
+	for(auto it=target->begin();it!=target->end();++it)
+	{
+		d_printCard(*it);
+	}
 }
 #endif
