@@ -135,7 +135,7 @@ private:
 	std::vector<int>* getCemeteryBySide(bool side);
 
 	void shuffleVec(std::vector<int>* vec);
-	void exchangeCard(int index, std::vector<GameUnit *> *handCard, std::vector<int> *base);
+	int exchangeCard(int index, std::vector<GameUnit *> *handCard, std::vector<int> *base);
 
 public:
     void setMyBase(std::vector<int>* _base);
