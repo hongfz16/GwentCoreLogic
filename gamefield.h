@@ -77,6 +77,7 @@ public slots:
 	void makePowerToN(std::vector<GameUnit*> *vec,int N);
 
 	void destroyTarget(std::vector<GameUnit*> *vec);
+	void destroyTarget(GameUnit *target);
 
 	void eatTarget(std::vector<GameUnit*> *vec,GameUnit *eator);
 
@@ -100,6 +101,9 @@ public slots:
 	void getRow(std::vector<GameUnit*> *vec,int rowNum);
 
 	void deployCardsFromBase(int id,int rowNum,int index,bool side,int type);
+
+
+	void clearRow(std::vector<GameUnit*> *row);
 
 private:
 	std::vector<GameUnit*> myHandCard;
@@ -155,6 +159,7 @@ public:
 	void shuffle();
 	void peekCards(int Num);
 	void exchangeCards(int index, bool side);
+	void roundClear();
 
 };
 

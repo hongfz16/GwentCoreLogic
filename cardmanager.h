@@ -8,6 +8,7 @@
 #include <QJsonObject>
 #include <QFile>
 #include <QDebug>
+#include "gameconstant.h"
 
 class CardManager : public QObject
 {

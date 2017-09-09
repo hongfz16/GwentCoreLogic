@@ -5,6 +5,7 @@
 #include <QTcpServer>
 #include <map>
 #include "mythread.h"
+#include "gameconstant.h"
 
 class GwentServer : public QTcpServer
 {

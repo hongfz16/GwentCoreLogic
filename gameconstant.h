@@ -1,6 +1,8 @@
 #ifndef GAMECONSTANT_H
 #define GAMECONSTANT_H
 
+#define DEBUG
+
 namespace CONSTANT {
 	const int firstDrawNum=10;
 	const int firstExchangeNum=3;

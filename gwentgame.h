@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include "fieldmanager.h"
+#include "gameconstant.h"
 
 class GwentGame : public QObject
 {

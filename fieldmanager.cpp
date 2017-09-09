@@ -15,6 +15,9 @@ FieldManager::FieldManager(std::vector<int> *myBase, std::vector<int> *opBase, Q
 	myScore=0;
 	opScore=0;
 	round=1;
+
+	connect(myField,SIGNAL(newCardDeployed(GameUnit*)),this,SLOT(newCardDeployed(GameUnit*)));
+	connect(myField,SIGNAL(cardDestroyed(GameUnit*)),this,SLOT(cardDestroyed(GameUnit*)));
 }
 
 void FieldManager::implementInstant()
@@ -198,6 +201,26 @@ int FieldManager::settlement()
 	 * send message to client telling them all units remaining on the field
 	 * send message to tell clients the current score
 	 */
+	int myRoundPoint=getMyPoint();
+	int opRoundPoint=getOpPoint();
+	int returnValue=0;
+	if(myRoundPoint > opRoundPoint)
+	{
+		++myScore;
+		returnValue=1;
+	}
+	else if(myRoundPoint < opRoundPoint)
+	{
+		++opScore;
+		returnValue=2;
+	}
+	else
+	{
+		++myScore;
+		++opScore;
+		returnValue=3;
+	}
+	myField->roundClear();
 }
 
 void FieldManager::gameOver()
@@ -430,7 +453,47 @@ int FieldManager::getFightFromVec(const std::vector<GameUnit *> *vec)
 
 bool FieldManager::commonChooseCardAndDeploy(bool side)
 {
-
+	QJsonObject info;
+	info.insert("type","chooseAndDeploy");
+	if(side)
+	{
+		myThread->waitForDrawCard(&info);
+	}
+	else
+	{
+		opThread->waitForDrawCard(&info);
+	}
+	if(info.find("error")!=info.end())
+	{
+		//TODO
+		//deal with connection break
+	}
+	else if(info.find("exception")!=info.end() && info["exception"].toString()==QString("timeout"))
+	{
+		//TODO
+		//punish timeout
+	}
+	else if(info.find("pass")!=info.end())
+	{
+		return false;
+	}
+	else
+	{
+		int handIndex=info["hand"].toInt();
+		GameUnit *target=nullptr;
+		if(side)
+		{
+			target=(myField->getMyHandCard())[handIndex];
+		}
+		else
+		{
+			target=(myField->getOpHandCard())[handIndex];
+		}
+		int infoRowNum=info["rowNum"].toInt();
+		int infoIndex=info["index"].toInt();
+		myField->deployCards(target,infoRowNum,infoIndex);
+		return true;
+	}
 }
 
 void FieldManager::setPass(bool side)

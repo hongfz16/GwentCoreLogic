@@ -9,6 +9,7 @@
 #include <QMap>
 #include "cardmanager.h"
 #include "gameunit.h"
+#include "gameconstant.h"
 #include <vector>
 #include <map>
 

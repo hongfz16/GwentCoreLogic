@@ -19,6 +19,9 @@ GameField::GameField(QObject *parent) : QObject(parent)
 	connect(this,SIGNAL(baseChanged(bool)),this,SLOT(baseChangedSlot(bool)));
 	connect(this,SIGNAL(cemeteryChanged(bool)),this,SLOT(cemeteryChangedSlot(bool)));
 	connect(this,SIGNAL(handCardChanged(bool)),this,SLOT(handCardChangedSlot(bool)));
+
+	connect(this,SIGNAL(newCardDeployed(GameUnit*)),this,SLOT(newCardDeployedToQJsonObject(GameUnit*)));
+	connect(this,SIGNAL(cardDestroyed(GameUnit*)),this,SLOT(cardDestroyedToQJsonObject(GameUnit*)));
 }
 
 void GameField::gameUnitChanged(GameUnit *target)
@@ -580,6 +583,26 @@ void GameField::destroyTarget(std::vector<GameUnit *> *vec)
 	}
 }
 
+void GameField::destroyTarget(GameUnit *target)
+{
+	if(target->getRowNum()>0)
+		addToCemetery(target->getCardId(),true);
+	else
+		addToCemetery(target->getCardId(),false);
+	std::vector<GameUnit*> *targetRow=getRowByNum(target->getRowNum());
+	int count=0;
+	auto itt=targetRow->begin();
+	for(;itt!=targetRow->end();++itt)
+	{
+		if((*itt)==target)
+			break;
+		count++;
+	}
+	deleteFromVector(target);
+	emit cardDestroyed(target);
+	delete(target);
+}
+
 void GameField::eatTarget(std::vector<GameUnit *> *vec, GameUnit *eator)
 {
 	for(auto it=vec->begin();it!=vec->end();++it)
@@ -850,6 +873,31 @@ void GameField::deployCardsFromBase(int id, int rowNum, int index, bool side, in
 		targetVec->insert(targetVec->begin()+index,unit);
 		connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
 		emit newCardDeployed(unit);
+	}
+}
+
+void GameField::roundClear()
+{
+	clearRow(opBack);
+	clearRow(opMiddle);
+	clearRow(opFront);
+	clearRow(myBack);
+	clearRow(myMiddle);
+	clearRow(myFront);
+}
+
+void GameField::clearRow(std::vector<GameUnit *> *row)
+{
+	for(auto it=row->begin();it!=row->end();++it)
+	{
+		if((*it)->isLocked())
+		{
+			(*it)->undoLock();
+		}
+		else
+		{
+			destroyTarget((*it));
+		}
 	}
 }
 
