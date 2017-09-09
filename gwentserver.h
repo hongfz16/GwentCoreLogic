@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTcpServer>
+#include <gwentgame.h>
 #include <map>
 #include "mythread.h"
 #include "gameconstant.h"
@@ -25,6 +26,10 @@ public slots:
 
 private:
     std::map<qintptr,MyThread*> idThreadMap;
+
+	std::vector<GwentGame*> gameManager;
+
+	void myPair();
 
 public:
     void addThreadToMap(qintptr ID,MyThread *thread);

@@ -116,13 +116,21 @@ void FieldManager::firstDraw()
 	{
 		//TODO
 	}
+#ifdef DEBUG
+	else if(myInfo.find("cancel")!=myInfo.end() &&opInfo.find("cancel")!=opInfo.end())
+	{
+		return;
+	}
+#endif
+#ifndef DEBUG
 	else
 	{
-		myField->updateHandCard(true,&myInfo);//TODO
+		myField->updateHandCard(true,&myInfo);//TODO addfunc
 		myField->updateHandCard(false,&opInfo);//TODO
-		myField->updateBase(true,&myInfo);
-		myField->updateBase(false,&opInfo);
+		myField->updateBase(true,&myInfo);//TODO
+		myField->updateBase(false,&opInfo);//TODO
 	}
+#endif
 }
 
 void FieldManager::secondDraw()
@@ -314,7 +322,7 @@ void FieldManager::addEffect(int _id,GameUnit *target,int type=0)
 
 	connect(em,SIGNAL(resurrectCardToRow(int,bool,int,int,int)),myField,SLOT(resurrectCardToRow(int,bool,int,int,int)));
 
-	connect(em,SIGNAL(generateNCard(int,int,GameUnit*,int)),myField,SLOT(generateNCard(int,int,GameUnit*,int)));
+	connect(em,SIGNAL(generateNCard(int,int,std::vector<GameUnit*>*,int)),myField,SLOT(generateNCard(int,int,std::vector<GameUnit*>*,int)));
 
 	connect(em,SIGNAL(getRow(std::vector<GameUnit*>*,int)),myField,SLOT(getRow(std::vector<GameUnit*>*,int)));
 
@@ -643,3 +651,69 @@ bool FieldManager::isOtherPassed()
 			return true;
 	}
 }
+
+#ifdef DEBUG
+void FieldManager::d_printAll()
+{
+	qDebug()<<"my point: "<<getMyPoint();
+	qDebug()<<"my front:";
+	qDebug()<<"    point: "<<getMyFrontPoint();
+	d_printRow(1);
+	qDebug()<<"my middle:";
+	qDebug()<<"    point: "<<getMyMiddlePoint();
+	d_printRow(2);
+	qDebug()<<"my back:";
+	qDebug()<<"    point: "<<getMyBackPoint();
+	d_printRow(3);
+	qDebug()<<"op front:";
+	qDebug()<<"    point: "<<getOpFrontPoint();
+	d_printRow(-1);
+	qDebug()<<"op middle:";
+	qDebug()<<"    point: "<<getOpMiddlePoint();
+	d_printRow(-2);
+	qDebug()<<"op back:";
+	qDebug()<<"    point: "<<getOpBackPoint();
+	d_printRow(-3);
+}
+
+void FieldManager::d_printRow(int rowNum)
+{
+	std::vector<GameUnit*> *target=nullptr;
+	switch(rowNum)
+	{
+	case 1:
+		target=myField->getMyFront();
+		break;
+	case 2:
+		target=myField->getMyMiddle();
+		break;
+	case 3:
+		target=myField->getMyBack();
+		break;
+	case -1:
+		target=myField->getOpFront();
+		break;
+	case -2:
+		target=myField->getOpMiddle();
+		break;
+	case -3:
+		target=myField->getOpBack();
+		break;
+	}
+	for(auto it=target->begin();it!=target->end();++it)
+	{
+		d_printUnit(*it);
+	}
+}
+
+void FieldManager::d_printUnit(GameUnit *unit)
+{
+	qDebug()<<"    {";
+	qDebug()<<"        id: "<<unit->getCardId();
+	qDebug()<<"        name: "<<unit->getName();
+	qDebug()<<"        type: "<<unit->getType();
+	qDebug()<<"        fight: "<<unit->getFight();
+	qDebug()<<"        protection: "<<unit->getProtection();
+	qDebug()<<"    }";
+}
+#endif

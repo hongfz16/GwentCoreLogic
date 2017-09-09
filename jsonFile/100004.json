@@ -1,0 +1,32 @@
+{
+	"id":100004,
+	"name":"Torrential Rain",
+	"img":"",
+	"fight":0,
+    "type":3,
+    "position":"anywhere",
+    "loyalty":false,
+    "timer":1,
+    "prepare":
+    {
+        "int":[["hurt",1],["max",5]],
+        "vector<GameUnit*>*":["weakest"]
+    },
+    "RoutineEffect":
+	{
+        "steps":
+        {
+            "function":
+            [
+                {
+                    "name":"findWeakestInRow",
+                    "parameter":["weakest","chooseRow","max"]
+                },
+                {
+                    "name":"damageByN",
+                    "parameter":["weakest","hurt"]
+                }
+            ]
+        }
+	}
+}

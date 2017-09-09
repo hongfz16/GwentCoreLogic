@@ -2,6 +2,7 @@
 #define GAMECONSTANT_H
 
 #define DEBUG
+#include <iostream>
 
 namespace CONSTANT {
 	const int firstDrawNum=10;

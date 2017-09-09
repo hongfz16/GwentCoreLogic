@@ -1,5 +1,10 @@
 <RCC>
     <qresource prefix="/json">
         <file>jsonFile/100000.json</file>
+        <file>jsonFile/100002.json</file>
+        <file>jsonFile/100003.json</file>
+        <file>jsonFile/100004.json</file>
+        <file>jsonFile/100005.json</file>
+        <file>jsonFile/100011.json</file>
     </qresource>
 </RCC>

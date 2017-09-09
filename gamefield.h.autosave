@@ -96,7 +96,7 @@ public slots:
 	void resurrectCardToRow(int id, bool cemeterySide, int rowNum, int index, int type);//CHANGED
 
 	void generateNCard(int id,int rowNum,int index,int N);
-	void generateNCard(int id, int rowNum,std::vector<GameUnit*> *target, int N);
+	void generateNCard(int id, int rowNum, std::vector<GameUnit*> *_target, int N);
 
 	void getRow(std::vector<GameUnit*> *vec,int rowNum);
 

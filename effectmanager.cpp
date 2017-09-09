@@ -248,7 +248,7 @@ void EffectManager::implementFuntion(QJsonObject funcOb)
 	}
 	if(funcName==QString("generateNCard"))
 	{
-		emit generateNCard(intMap[paraArray[0].toString()],intMap[paraArray[1].toString()],getTargetUnit(paraArray[2].toString()),intMap[paraArray[3].toString()]);
+		emit generateNCard(intMap[paraArray[0].toString()],intMap[paraArray[1].toString()],getTargetVec(paraArray[2].toString()),intMap[paraArray[3].toString()]);
 		return;
 	}
 
@@ -341,6 +341,9 @@ void EffectManager::findTarget(QJsonObject JOFind)
 void EffectManager::prepare()
 {
 	unitMap["self"]=self;
+	std::vector<GameUnit*> *selfVec=new std::vector<GameUnit*>;
+	selfVec->push_back(self);
+	vecMap["self"]=selfVec;
 	boolMap["this"]=side;
 	boolMap["that"]=!side;
 	for(auto it=prepareJson.begin();it!=prepareJson.end();++it)

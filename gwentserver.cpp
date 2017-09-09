@@ -29,7 +29,11 @@ void GwentServer::incomingConnection(qintptr socketDescriptor)
     connect(thread,SIGNAL(needToRemoveFromMap(qintptr)),this,SLOT(removeThreadFromMap(qintptr)));
 	connect(thread,SIGNAL(sendSignalToServer(qintptr,QString)),this,SLOT(threadSendSignalToServer(qintptr,QString)));
 
-    thread->start();
+	thread->start();
+
+#ifdef DEBUG
+	myPair();
+#endif
 }
 
 void GwentServer::removeThreadFromMap(qintptr id)
@@ -40,7 +44,17 @@ void GwentServer::removeThreadFromMap(qintptr id)
 
 void GwentServer::threadSendSignalToServer(qintptr id, QString mess)
 {
-    qDebug()<<"Thread "<<id<<" send message "<<mess;
+	qDebug()<<"Thread "<<id<<" send message "<<mess;
+}
+
+void GwentServer::myPair()
+{
+#ifdef DEBUG
+	if(idThreadMap.size()==2)
+	{
+		GwentGame *d_game=new GwentGame();
+	}
+#endif
 }
 
 void GwentServer::addThreadToMap(qintptr ID, MyThread *thread)

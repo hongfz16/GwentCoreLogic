@@ -75,7 +75,7 @@ signals:
 
 	//void resurrectCard(int id, bool cemeterySide,bool resurrectSide);
 
-	void generateNCard(int id, int rowNum,GameUnit *target, int N);
+	void generateNCard(int id, int rowNum,std::vector<GameUnit*> *_target, int N);
 
 	void getRow(std::vector<GameUnit*> *vec,int rowNum);
 

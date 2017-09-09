@@ -52,6 +52,7 @@ void MyThread::sendQJsonObject(QJsonObject info)
 
 void MyThread::sendQJsonObjectAndWaitForResponde(QJsonObject *info)
 {
+#ifndef DEBUG
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
 	sendQJsonObject(*info);
 	int millisec=(*info)["wait"].toInt()*CONSTANT::millisecPerSec;
@@ -89,10 +90,22 @@ void MyThread::sendQJsonObjectAndWaitForResponde(QJsonObject *info)
 		}
 	}
 	connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()), Qt::DirectConnection);
+
+#endif
+#ifdef DEBUG
+	int d_rownum,d_index;
+	qDebug()<<"input a rowNum";
+	std::cin>>d_rownum;
+	info->insert("rowNum",d_rownum);
+	qDebug()<<"input an index";
+	std::cin>>d_index;
+	info->insert("index",d_index);
+#endif
 }
 
 void MyThread::waitForDrawCard(QJsonObject *info)
 {
+#ifndef DEBUG
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
 
 	//sendQJsonObject(*info);
@@ -130,10 +143,15 @@ void MyThread::waitForDrawCard(QJsonObject *info)
 	}
 
 	connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()), Qt::DirectConnection);
+#endif
+#ifdef DEBUG
+	info->insert("cancel",0);
+#endif
 }
 
 void MyThread::waitForDeploy(QJsonObject *info)
 {
+#ifndef DEBUG
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
 
 	sendQJsonObject(*info);
@@ -177,6 +195,20 @@ void MyThread::waitForDeploy(QJsonObject *info)
 	}
 
 	connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()), Qt::DirectConnection);
+#endif
+
+#ifdef DEBUG
+	int d_handcardindex,d_rownum,d_index;
+	qDebug()<<"input a handcard index";
+	std::cin>>d_handcardindex;
+	qDebug()<<"input a rownum";
+	std::cin>>d_rownum;
+	qDebug()<<"input an index";
+	std::cin>>d_index;
+	info->insert("handCardIndex",d_handcardindex);
+	info->insert("rowNum",d_rownum);
+	info->insert("index",d_index);
+#endif
 }
 
 void MyThread::parseQJsonObject(QJsonDocument JDData)

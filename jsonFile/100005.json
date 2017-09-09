@@ -1,0 +1,36 @@
+{
+	"id":100005,
+	"name":"Lacerate",
+	"img":"",
+	"fight":0,
+    "type":3,
+    "position":"anywhere",
+    "loyalty":false,
+    "timer":0,
+    "prepare":
+    {
+        "int":[["hurt",3]],
+        "vector<GameUnit*>*":["all"]
+    },
+    "DeployEffect":
+	{
+        "steps":
+        {
+            "function":
+            [
+                {
+                    "name":"getRow",
+                    "parameter":["all","chooseRow"]
+                },
+                {
+                    "name":"damageByN",
+                    "parameter":["all","hurt"]
+                },
+                {
+                    "name":"destroyTarget",
+                    "parameter":["self"]
+                }
+            ]
+        }
+	}
+}

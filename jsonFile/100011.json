@@ -1,0 +1,27 @@
+{
+	"id":100011,
+	"name":"Dagon",
+	"img":"",
+	"fight":6,
+    "type":4,
+    "position":"anywhere",
+    "loyalty":true,
+    "timer":0,
+    "prepare":
+    {
+    	"int":[["id",1000002],["N",1]]
+    },
+    "DeployEffect":
+    {
+    	"steps":
+    	{
+    		"function":
+    		[
+    			{
+    				"name":"generateNCard",
+    				"parameter":["id","chooseRow","chooseTarget","N"]
+    			}
+    		]
+    	}
+    }
+}

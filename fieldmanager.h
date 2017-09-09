@@ -113,6 +113,11 @@ public:
 	int getOpScore() {return opScore;}
 	int getRound() {return round;}
 
+#ifdef DEBUG
+	void d_printAll();
+	void d_printRow(int rowNum);
+	void d_printUnit(GameUnit* unit);
+#endif
 };
 
 #endif // FIELDMANAGER_H

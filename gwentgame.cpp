@@ -2,10 +2,18 @@
 
 GwentGame::GwentGame(QObject *parent) : QObject(parent)
 {
+#ifndef DEBUG
 	//TODO
 	//need to figure out when the player choose the base
 	//need to set thread
 	fm=new FieldManager(nullptr,nullptr);
+#endif
+
+#ifdef DEBUG
+	std::vector<int> *myBase=new std::vector<int>;
+	std::vector<int> *opBase=new std::vector<int>;
+
+#endif
 }
 
 void GwentGame::startGame()

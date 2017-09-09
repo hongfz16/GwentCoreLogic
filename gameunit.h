@@ -32,6 +32,7 @@ private:
 
 public:
     int getCardId() const {return cardId;}
+	QString getName() const {return name;}
     bool getType() const {return type;}
     int getFight() const {return fight;}
     int getProtection() const {return protection;}
