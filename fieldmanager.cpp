@@ -481,11 +481,11 @@ bool FieldManager::commonChooseCardAndDeploy(bool side)
 	info.insert("type","chooseAndDeploy");
 	if(side)
 	{
-		myThread->waitForDrawCard(&info);
+		myThread->waitForDeploy(&info);
 	}
 	else
 	{
-		opThread->waitForDrawCard(&info);
+		opThread->waitForDeploy(&info);
 	}
 	if(info.find("error")!=info.end())
 	{
@@ -633,8 +633,8 @@ void FieldManager::setMyThread(MyThread *th)
 	connect(myField,SIGNAL(cemeteryChangedToClient(QJsonObject)),myThread,SLOT(sendQJsonObject(QJsonObject)));
 	connect(myField,SIGNAL(handCardChangedToClient(QJsonObject)),myThread,SLOT(sendQJsonObject(QJsonObject)));
 
-	connect(this,SIGNAL(effectChooseRowMyThread(QJsonObject*)),myThread,SLOT(sendQJsonObjectAndWaitForRespode(QJsonObject*)));
-	connect(this,SIGNAL(effectChooseTargetMyThread(QJsonObject*)),myThread,SLOT(sendQJsonObjectAndWaitForRespode(QJsonObject*)));
+	connect(this,SIGNAL(effectChooseRowMyThread(QJsonObject*)),myThread,SLOT(sendQJsonObjectAndWaitForResponde(QJsonObject*)));
+	connect(this,SIGNAL(effectChooseTargetMyThread(QJsonObject*)),myThread,SLOT(sendQJsonObjectAndWaitForResponde(QJsonObject*)));
 }
 
 void FieldManager::setOpThread(MyThread *th)
@@ -646,8 +646,8 @@ void FieldManager::setOpThread(MyThread *th)
 	connect(myField,SIGNAL(cemeteryChangedToClient(QJsonObject)),opThread,SLOT(sendQJsonObject(QJsonObject)));
 	connect(myField,SIGNAL(handCardChangedToClient(QJsonObject)),opThread,SLOT(sendQJsonObject(QJsonObject)));
 
-	connect(this,SIGNAL(effectChooseRowOpThread(QJsonObject*)),opThread,SLOT(sendQJsonObjectAndWaitForRespode(QJsonObject*)));
-	connect(this,SIGNAL(effectChooseTargetOpThread(QJsonObject*)),opThread,SLOT(sendQJsonObjectAndWaitForRespode(QJsonObject*)));
+	connect(this,SIGNAL(effectChooseRowOpThread(QJsonObject*)),opThread,SLOT(sendQJsonObjectAndWaitForResponde(QJsonObject*)));
+	connect(this,SIGNAL(effectChooseTargetOpThread(QJsonObject*)),opThread,SLOT(sendQJsonObjectAndWaitForResponde(QJsonObject*)));
 }
 
 bool FieldManager::isOtherPassed()
@@ -698,6 +698,10 @@ void FieldManager::d_printAll()
 	d_printCemetery(true);
 	qDebug()<<"op cemetery";
 	d_printCemetery(false);
+	qDebug()<<"my base";
+	d_printBase(true);
+	qDebug()<<"op base";
+	d_printBase(false);
 }
 
 void FieldManager::d_printRow(int rowNum)

@@ -6,14 +6,14 @@ CardManager::CardManager(int _cardId, QObject *parent) : QObject(parent)
 
 	fileName=":/json/jsonFile/"+QString::number(cardId)+".json";
 
-    qDebug()<<fileName;
+	//qDebug()<<fileName;
 
     QFile file(fileName);
     file.open(QFile::ReadOnly|QFile::Text);
     QString val=file.readAll();
     file.close();
 
-    qDebug()<<val;
+	//qDebug()<<val;
 
     jsonFile=new QJsonDocument();
     jsonObject=new QJsonObject();

@@ -26,6 +26,8 @@ GwentGame::GwentGame(MyThread *myThread, MyThread *opThread, QObject *parent) : 
 		opBase->push_back(100011);
 	}
 	fm=new FieldManager(myBase,opBase);
+	fm->setMyThread(myThread);
+	fm->setOpThread(opThread);
 #endif
 }
 

@@ -2,7 +2,7 @@
 
 GwentServer::GwentServer(QObject *parent) : QTcpServer(parent)
 {
-
+	connect(this,SIGNAL(newConnection()),this,SLOT(myPair()));
 }
 
 void GwentServer::startServer()
@@ -23,14 +23,14 @@ void GwentServer::incomingConnection(qintptr socketDescriptor)
 
     MyThread *thread=new MyThread(socketDescriptor,this);
 
-    addThreadToMap(socketDescriptor,thread);
+
 
     connect(thread,SIGNAL(finished()),thread,SLOT(deleteLater()));
     connect(thread,SIGNAL(needToRemoveFromMap(qintptr)),this,SLOT(removeThreadFromMap(qintptr)));
 	connect(thread,SIGNAL(sendSignalToServer(qintptr,QString)),this,SLOT(threadSendSignalToServer(qintptr,QString)));
 
 	thread->start();
-
+	addThreadToMap(socketDescriptor,thread);
 }
 
 void GwentServer::removeThreadFromMap(qintptr id)

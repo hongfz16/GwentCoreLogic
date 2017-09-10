@@ -24,8 +24,8 @@ GameUnit::GameUnit(int _cardId, QObject *parent) : QObject(parent),cardId(_cardI
     locked=false;
 	oldRowNum=0;
 	rowNum=0;
-    qDebug()<<"Here";
-    qDebug()<<name<<": "<<fight<<" "<<type<<" "<<protection<<" "<<locked;
+	//qDebug()<<"Here";
+	//qDebug()<<name<<": "<<fight<<" "<<type<<" "<<protection<<" "<<locked;
 }
 
 void GameUnit::decreaseFight(int num, bool protectionUnseen)

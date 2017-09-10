@@ -24,6 +24,9 @@ public slots:
     void removeThreadFromMap(qintptr id); // SIGNAL: MyThread::needToRemoveFromMap
     void threadSendSignalToServer(qintptr id,QString mess); //SIGNAL: MyThread::sendSignalToServer
 
+#ifdef DEBUG
+	void myPair();
+#endif
 private:
     std::map<qintptr,MyThread*> idThreadMap;
 
@@ -34,9 +37,6 @@ private:
 public:
     void addThreadToMap(qintptr ID,MyThread *thread);
 
-#ifdef DEBUG
-	void myPair();
-#endif
 };
 
 #endif // GWENTSERVER_H
