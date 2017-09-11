@@ -32,7 +32,10 @@ void GameUnit::decreaseFight(int num, bool protectionUnseen)
 {
     if(protectionUnseen)
     {
-        fight-=num;
+		if(num>fight)
+			fight=0;
+		else
+			fight-=num;
     }
     else
     {
@@ -41,7 +44,7 @@ void GameUnit::decreaseFight(int num, bool protectionUnseen)
         else
         {
             decreaseProtection(protection);
-            fight-=(num-protection);
+            decreaseFight(num-protection,true);
         }
     }
 

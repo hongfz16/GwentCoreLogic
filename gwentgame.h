@@ -2,6 +2,7 @@
 #define GWENTGAME_H
 
 #include <QObject>
+#include <QDebug>
 
 #include "fieldmanager.h"
 #include "gameconstant.h"

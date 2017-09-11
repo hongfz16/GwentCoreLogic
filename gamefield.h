@@ -97,6 +97,7 @@ public slots:
 
 	void generateNCard(int id,int rowNum,int index,int N);
 	void generateNCard(int id, int rowNum, std::vector<GameUnit*> *_target, int N);
+	void generateNCardWithOutChooseTarget(int id, int rowNum, int N, bool side);
 
 	void getRow(std::vector<GameUnit*> *vec,int rowNum);
 

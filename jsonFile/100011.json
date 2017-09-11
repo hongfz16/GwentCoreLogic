@@ -9,7 +9,7 @@
     "timer":0,
     "prepare":
     {
-    	"int":[["id",1000002],["N",1]]
+        "int":[["id",100003],["N",1]]
     },
     "DeployEffect":
     {
@@ -18,8 +18,8 @@
     		"function":
     		[
     			{
-    				"name":"generateNCard",
-    				"parameter":["id","chooseRow","chooseTarget","N"]
+                    "name":"generateNCardWithOutChooseTarget",
+                    "parameter":["id","chooseRow","N","this"]
     			}
     		]
     	}

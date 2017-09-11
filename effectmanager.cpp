@@ -39,6 +39,9 @@ EffectManager::EffectManager(int id, bool _side, GameUnit *target, int effectTyp
 	}
 	prepareJson=cm->getPrepare();
 	prepare();
+	//TODELETE
+	//QJsonDocument temp(effectJson);
+	//qDebug()<<temp.toJson();
 }
 
 std::vector<GameUnit *> *EffectManager::getTargetVec(QString key)
@@ -63,7 +66,9 @@ int EffectManager::getTargetInt(QString key)
 {
 	auto it=intMap.find(key);
 	if(it==intMap.end())
-		return -1;
+	{
+		return transRowNum(key);
+	}
 	return it.value();
 }
 
@@ -170,10 +175,107 @@ bool EffectManager::judgeExist(QJsonObject JOCompare)
 
 void EffectManager::implementFuntion(QJsonObject funcOb)
 {
-	QString funcName=funcOb["name"].toString();
+	QJsonObject JOFind=funcOb;
+	QString funcName=(JOFind["name"].toString());
+	int para2=0;
+	QJsonArray JAPara=JOFind["parameter"].toArray();
+	if(funcName==QString("findWeakestInRow"))
+	{
+		std::vector<GameUnit*> *vec=new std::vector<GameUnit*>();
+		QString paraNum=(JOFind["parameter"].toArray())[0].toString();
+		vecMap[paraNum]=vec;
+		int size=(JOFind["parameter"].toArray()).size();
+
+		para2=transRowNum((JOFind["parameter"].toArray())[1].toString());
+		switch(size)
+		{
+		case 2:
+			emit findWeakestInRow(vec,para2);
+			return;
+		case 3:
+			emit findWeakestInRow(vec,para2,intMap[JAPara[2].toString()]);
+			return;
+		}
+	}
+	if(funcName==QString("findStrongestInRow"))
+	{
+		std::vector<GameUnit*> *vec=new std::vector<GameUnit*>();
+		QString paraNum=(JOFind["parameter"].toArray())[0].toString();
+		vecMap[paraNum]=vec;
+		int size=(JOFind["parameter"].toArray()).size();
+
+		para2=getTargetInt((JOFind["parameter"].toArray())[1].toString());
+		switch(size)
+		{
+		case 2:
+			emit findStrongestInRow(vec,para2);
+			return;
+		case 3:
+			emit findStrongestInRow(vec,para2,intMap[JAPara[2].toString()]);
+			return;
+		default:
+			qDebug()<<"cannot emit find signal";
+			return;
+		}
+	}
+	if(funcName==QString("findNear"))
+	{
+		std::vector<GameUnit*> *vec=new std::vector<GameUnit*>();
+		QString paraNum=(JOFind["parameter"].toArray())[0].toString();
+		vecMap[paraNum]=vec;
+		int size=(JOFind["parameter"].toArray()).size();
+
+		para2=transRowNum((JOFind["parameter"].toArray())[1].toString());
+		emit findNear(vec,para2,unitMap[JAPara[2].toString()],intMap[JAPara[3].toString()],intMap[JAPara[4].toString()]);
+		return;
+	}
+	if(funcName==QString("findWeakestInAll"))
+	{
+		std::vector<GameUnit*> *vec=new std::vector<GameUnit*>();
+		QString paraNum=(JOFind["parameter"].toArray())[0].toString();
+		vecMap[paraNum]=vec;
+		int size=(JOFind["parameter"].toArray()).size();
+
+		switch (size) {
+		case 1:
+			emit findWeakestInAll(vec);
+			return;
+		case 2:
+			para2=transRowNum((JOFind["parameter"].toArray())[1].toString());
+			emit findWeakestInAll(vec,para2);
+			return;
+		}
+	}
+	if(funcName==QString("findStrongestInAll"))
+	{
+		std::vector<GameUnit*> *vec=new std::vector<GameUnit*>();
+		QString paraNum=(JOFind["parameter"].toArray())[0].toString();
+		vecMap[paraNum]=vec;
+		int size=(JOFind["parameter"].toArray()).size();
+
+		switch(size){
+		case 1:
+			emit findStrongestInAll(vec);
+			return;
+		case 2:
+			para2=transRowNum((JOFind["parameter"].toArray())[1].toString());
+			emit findStrongestInAll(vec,para2);
+			return;
+		}
+	}
+	//QString funcName=funcOb["name"].toString();
 	QJsonArray paraArray=funcOb["parameter"].toArray();
 	if(funcName==QString("damageByN"))
 	{
+		std::vector<GameUnit*> *targetvec=nullptr;
+		targetvec=getTargetVec(paraArray[0].toString());
+		qDebug()<<"print all in the targetvec";
+		if(targetvec==nullptr)
+			qDebug()<<"targetvec==nullptr!";
+		for(auto it=targetvec->begin();it!=targetvec->end();++it)
+		{
+			qDebug()<<(*it)->getName();
+		}
 		emit damageByN(getTargetVec(paraArray[0].toString()),intMap[paraArray[1].toString()]);
 		return;
 	}
@@ -251,10 +353,17 @@ void EffectManager::implementFuntion(QJsonObject funcOb)
 		emit generateNCard(intMap[paraArray[0].toString()],intMap[paraArray[1].toString()],getTargetVec(paraArray[2].toString()),intMap[paraArray[3].toString()]);
 		return;
 	}
-
+	if(funcName==QString("generateNCardWithOutChooseTarget"))
+	{
+		emit generateNCardWithOutChooseTarget(getTargetInt(paraArray[0].toString()),getTargetInt(paraArray[1].toString()),getTargetInt(paraArray[2].toString()),boolMap[paraArray[3].toString()]);
+		return;
+	}
 	if(funcName==QString("getRow"))
 	{
-		emit getRow(getTargetVec(paraArray[0].toString()),intMap[paraArray[1].toString()]);
+		//TODELETE
+		int temp=getTargetInt(paraArray[1].toString());
+		qDebug()<<"getRow para:rowNum"<<temp;
+		emit getRow(getTargetVec(paraArray[0].toString()),getTargetInt(paraArray[1].toString()));
 		return;
 	}
 
@@ -263,7 +372,10 @@ void EffectManager::implementFuntion(QJsonObject funcOb)
 int EffectManager::transRowNum(QString rowInfo)
 {
 	if(rowInfo=="selfRow")
+	{
+		//qDebug()<<self->getRowNum();
 		return self->getRowNum();
+	}
 	if(rowInfo=="oppositeRow")
 		return -(self->getRowNum());
 	if(rowInfo=="chooseRow")
@@ -362,7 +474,7 @@ void EffectManager::prepare()
 			QJsonArray tempArray=it.value().toArray();
 			for(auto itt=tempArray.begin();itt!=tempArray.end();++itt)
 			{
-				vecMap[(*itt).toString()]=nullptr;
+				vecMap[(*itt).toString()]=new std::vector<GameUnit*>();
 			}
 		}
 		if(it.key()=="bool")
@@ -389,10 +501,17 @@ void EffectManager::prepare()
 
 void EffectManager::implementEffect(bool turn)
 {
-	if(side!=turn)
-		return;
+//	if(side!=turn)
+//	{
+//		qDebug()<<"side!=turn";
+//		return;
+//	}
 	if(!myTimerUp())
+	{
+		qDebug()<<"!myTimeup() "<<timer;
+		updateTimer();
 		return;
+	}
 	auto it=effectJson.find("condition");
 	if(it!=effectJson.end())
 	{
@@ -408,7 +527,10 @@ void EffectManager::implementEffect(bool turn)
 	for(auto arrayit=JAFunctions.begin();arrayit!=JAFunctions.end();++arrayit)
 	{
 		implementFuntion((*arrayit).toObject());
+		//TODELETE
+		qDebug()<<"implement effect";
 	}
+	resetTimer();
 }
 
 void EffectManager::updateTimer()
@@ -455,6 +577,7 @@ int EffectManager::chooseRow()
 	info.insert("wait",CONSTANT::waitForEffectTargetChoose);
 	emit EffectChooseRow(&info);
 
+	intMap["chooseRow"]=info["rowNum"].toInt();
 	return info["rowNum"].toInt();
 }
 

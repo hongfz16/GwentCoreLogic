@@ -22,6 +22,11 @@ FieldManager::FieldManager(std::vector<int> *myBase, std::vector<int> *opBase, Q
 
 void FieldManager::implementInstant()
 {
+	if(instantEffects.empty())
+	{
+		//qDebug()<<"instant effect empty!";
+		return;
+	}
 	for(auto it=instantEffects.begin();it!=instantEffects.end();++it)
 	{
 		(*it)->implementEffect(turn);
@@ -35,6 +40,11 @@ void FieldManager::implementInstant()
 
 void FieldManager::implementRoutine()
 {
+	if(routineEffects.empty())
+	{
+		qDebug()<<"routine effects empty!";
+		return;
+	}
 	for(auto it=routineEffects.begin();it!=routineEffects.end();++it)
 	{
 		(*it)->implementEffect(turn);
@@ -120,6 +130,7 @@ void FieldManager::firstDraw()
 	else if(myInfo.find("cancel")!=myInfo.end() &&opInfo.find("cancel")!=opInfo.end())
 	{
 		return;
+		qDebug()<<"here";
 	}
 #endif
 #ifndef DEBUG
@@ -266,6 +277,7 @@ void FieldManager::addEffect(int _id,GameUnit *target,int type=0)
 		if(cm.haveRoutineEffect())
 		{
 			em=new EffectManager(_id,turn,target,1);
+			//qDebug()<<"have routine effect";
 			routineEffects.push_back(em);
 		}
 		if(cm.haveDeadWishEffect())
@@ -292,6 +304,8 @@ void FieldManager::addEffect(int _id,GameUnit *target,int type=0)
 			cemeteryPassiveEffects.push_back(em);
 		}
 	}
+	if(em!=nullptr)
+	{
 	connect(em,SIGNAL(findWeakestInRow(std::vector<GameUnit*>*,int)),myField,SLOT(findWeakestInRow(std::vector<GameUnit*>*,int)));
 
 	connect(em,SIGNAL(findWeakestInRow(std::vector<GameUnit*>*,int,int)),myField,SLOT(findWeakestInRow(std::vector<GameUnit*>*,int,int)));
@@ -300,7 +314,7 @@ void FieldManager::addEffect(int _id,GameUnit *target,int type=0)
 
 	connect(em,SIGNAL(findStrongestInRow(std::vector<GameUnit*>*,int,int)),myField,SLOT(findStrongestInRow(std::vector<GameUnit*>*,int,int)));
 
-	connect(em,SIGNAL(findNear(std::vector<GameUnit*>*,int,int,GameUnit*,int,int)),myField,SLOT(findNear(std::vector<GameUnit*>*,int,int,GameUnit*,int,int)));
+	connect(em,SIGNAL(findNear(std::vector<GameUnit*>*,int,GameUnit*,int,int)),myField,SLOT(findNear(std::vector<GameUnit*>*,int,GameUnit*,int,int)));
 
 	connect(em,SIGNAL(findWeakestInAll(std::vector<GameUnit*>*)),myField,SLOT(findWeakestInAll(std::vector<GameUnit*>*)));
 
@@ -348,6 +362,9 @@ void FieldManager::addEffect(int _id,GameUnit *target,int type=0)
 
 	connect(em,SIGNAL(EffectChooseTarget(QJsonObject*)),this,SLOT(receiveEffectChooseTarget(QJsonObject*)));
 
+	connect(em,SIGNAL(generateNCardWithOutChooseTarget(int,int,int,bool)),myField,SLOT(generateNCardWithOutChooseTarget(int,int,int,bool)));
+
+	}
 }
 
 void FieldManager::initBaseEffect(int _id, bool side)
@@ -359,6 +376,8 @@ void FieldManager::initBaseEffect(int _id, bool side)
 		em=new EffectManager(_id,side,nullptr,4);
 		basePassiveEffects.push_back(em);
 	}
+	if(em!=nullptr)
+	{
 	connect(em,SIGNAL(findWeakestInRow(std::vector<GameUnit*>*,int)),myField,SLOT(findWeakestInRow(std::vector<GameUnit*>*,int)));
 
 	connect(em,SIGNAL(findWeakestInRow(std::vector<GameUnit*>*,int,int)),myField,SLOT(findWeakestInRow(std::vector<GameUnit*>*,int,int)));
@@ -414,6 +433,7 @@ void FieldManager::initBaseEffect(int _id, bool side)
 	connect(em,SIGNAL(EffectChooseRow(QJsonObject*)),this,SLOT(receiveEffectChooseRow(QJsonObject*)));
 
 	connect(em,SIGNAL(EffectChooseTarget(QJsonObject*)),this,SLOT(receiveEffectChooseTarget(QJsonObject*)));
+	}
 }
 
 void FieldManager::deleteEffect(int effectType,int id,GameUnit* unit=nullptr)
@@ -503,7 +523,9 @@ bool FieldManager::commonChooseCardAndDeploy(bool side)
 	}
 	else
 	{
-		int handIndex=info["hand"].toInt();
+		//qDebug()<<info;
+		int handIndex=info["handCardIndex"].toInt();
+		//qDebug()<<handIndex;
 		GameUnit *target=nullptr;
 		if(side)
 		{
@@ -564,7 +586,8 @@ void FieldManager::receiveEffectChooseTarget(QJsonObject *info)
 void FieldManager::newCardDeployed(GameUnit *unit)
 {
 	addEffect(unit->getCardId(),unit,0);
-
+	//TODELETE
+	//qDebug()<<"new card deployed signal and slot";
 	//TODO
 	//IMPLEMENT INSTANT EFFECT ??
 }
@@ -672,23 +695,18 @@ bool FieldManager::isOtherPassed()
 void FieldManager::d_printAll()
 {
 	qDebug()<<"my point: "<<getMyPoint();
-	qDebug()<<"my front:";
-	qDebug()<<"    point: "<<getMyFrontPoint();
+	qDebug()<<"op point: "<<getOpPoint();
+	qDebug()<<"my front: "<<getMyFrontPoint();
 	d_printRow(1);
-	qDebug()<<"my middle:";
-	qDebug()<<"    point: "<<getMyMiddlePoint();
+	qDebug()<<"my middle: "<<getMyMiddlePoint();
 	d_printRow(2);
-	qDebug()<<"my back:";
-	qDebug()<<"    point: "<<getMyBackPoint();
+	qDebug()<<"my back: "<<getMyBackPoint();
 	d_printRow(3);
-	qDebug()<<"op front:";
-	qDebug()<<"    point: "<<getOpFrontPoint();
+	qDebug()<<"op front: "<<getOpFrontPoint();
 	d_printRow(-1);
-	qDebug()<<"op middle:";
-	qDebug()<<"    point: "<<getOpMiddlePoint();
+	qDebug()<<"op middle: "<<getOpMiddlePoint();
 	d_printRow(-2);
-	qDebug()<<"op back:";
-	qDebug()<<"    point: "<<getOpBackPoint();
+	qDebug()<<"op back: "<<getOpBackPoint();
 	d_printRow(-3);
 	qDebug()<<"my handcard";
 	d_printHand(true);
@@ -736,24 +754,24 @@ void FieldManager::d_printRow(int rowNum)
 
 void FieldManager::d_printUnit(GameUnit *unit)
 {
-	qDebug()<<"    {";
-	qDebug()<<"        id: "<<unit->getCardId();
+//	qDebug()<<"    {";
+//	qDebug()<<"        id: "<<unit->getCardId();
 	qDebug()<<"        name: "<<unit->getName();
-	qDebug()<<"        type: "<<unit->getType();
-	qDebug()<<"        fight: "<<unit->getFight();
-	qDebug()<<"        protection: "<<unit->getProtection();
-	qDebug()<<"    }";
+//	qDebug()<<"        type: "<<unit->getType();
+//	qDebug()<<"        fight: "<<unit->getFight();
+//	qDebug()<<"        protection: "<<unit->getProtection();
+//	qDebug()<<"    }";
 }
 
 void FieldManager::d_printCard(int id)
 {
 	CardManager cm(id);
-	qDebug()<<"    {";
-	qDebug()<<"        id: "<<id;
+//	qDebug()<<"    {";
+//	qDebug()<<"        id: "<<id;
 	qDebug()<<"        name: "<<cm.getName();
-	qDebug()<<"        type: "<<cm.getType();
-	qDebug()<<"        fight: "<<cm.getFight();
-	qDebug()<<"    }";
+//	qDebug()<<"        type: "<<cm.getType();
+//	qDebug()<<"        fight: "<<cm.getFight();
+//	qDebug()<<"    }";
 }
 
 void FieldManager::d_printHand(bool side)

@@ -34,16 +34,22 @@ GwentGame::GwentGame(MyThread *myThread, MyThread *opThread, QObject *parent) : 
 void GwentGame::startGame()
 {
 	fm->shuffle();
+	qDebug()<<">>Shuffled!";
 	fm->d_printAll();
 	while(1)
 	{
+		qDebug()<<">>New round!";
 		if(fm->getMyScore()==2 || fm->getOpScore()==2)
 			break;
 		fm->newRound();
+		qDebug()<<">>Start draw cards!";
 		fm->drawCards();
+		qDebug()<<">>End draw cards!";
 		while(1)
 		{
+			qDebug()<<">>New turn!";
 			fm->d_printAll();
+			qDebug()<<">>"<<fm->getTurn();
 			if(!fm->commonChooseCardAndDeploy(fm->getTurn()))
 			{
 				fm->setPass(fm->getTurn());
@@ -56,8 +62,12 @@ void GwentGame::startGame()
 			}
 			else
 			{
+				qDebug()<<">>Start implement instant!";
 				fm->implementInstant();//TODO ADD PASSIVE EFFECT CHECK
+				qDebug()<<">>End implement instant!";
+				qDebug()<<">>Start implement routine!";
 				fm->implementRoutine();//TODO ADD PASSIVE EFFECT CHECK
+				qDebug()<<">>End implement routine!";
 				if(!fm->isOtherPassed())
 					fm->changeTurn();
 			}

@@ -74,43 +74,44 @@ int CardManager::getTimer()
 
 QJsonObject CardManager::getDeployEffect()
 {
-	QJsonValue JVDeploy=jsonObject->value(QString("DeployEffect"));
+	QJsonValue JVDeploy=(*jsonObject)["DeployEffect"];
 	return JVDeploy.toObject();
 }
 
 QJsonObject CardManager::getRoutineEffect()
 {
-	QJsonValue JVRoutine=jsonObject->value(QString("RoutineEffect"));
+	QJsonValue JVRoutine=(*jsonObject)["RoutineEffect"];
 	return JVRoutine.toObject();
 }
 
 QJsonObject CardManager::getDeadWishEffect()
 {
-	QJsonValue JVDeadWish=jsonObject->value(QString("DeadWish"));
+	QJsonValue JVDeadWish=(*jsonObject)["DeadWish"];
 	return JVDeadWish.toObject();
 }
 
 QJsonObject CardManager::getPrepare()
 {
-	QJsonValue JVDeadWish=jsonObject->value(QString("Prepare"));
-	return JVDeadWish.toObject();
+	QJsonValue JVDeadWish=(*jsonObject)["prepare"];
+	QJsonObject temp=JVDeadWish.toObject();
+	return temp;
 }
 
 QJsonObject CardManager::getDeployPassiveEffect()
 {
-	QJsonValue JVDeadWish=jsonObject->value(QString("DeployPassiveEffect"));
+	QJsonValue JVDeadWish=(*jsonObject)["DeployPassiveEffect"];
 	return JVDeadWish.toObject();
 }
 
 QJsonObject CardManager::getBasePassiveEffect()
 {
-	QJsonValue JVDeadWish=jsonObject->value(QString("BasePassiveEffect"));
+	QJsonValue JVDeadWish=(*jsonObject)["BasePassiveEffect"];
 	return JVDeadWish.toObject();
 }
 
 QJsonObject CardManager::getCemeteryPassiveEffect()
 {
-	QJsonValue JVDeadWish=jsonObject->value(QString("CemeteryPassiveEffect"));
+	QJsonValue JVDeadWish=(*jsonObject)["CemeteryPassiveEffect"];
 	return JVDeadWish.toObject();
 }
 

@@ -208,6 +208,7 @@ void MyThread::waitForDeploy(QJsonObject *info)
 	info->insert("handCardIndex",d_handcardindex);
 	info->insert("rowNum",d_rownum);
 	info->insert("index",d_index);
+	//qDebug()<<*info;
 #endif
 }
 

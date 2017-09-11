@@ -308,12 +308,12 @@ void GameField::findWeakestInRow(std::vector<GameUnit *> *vec, int rowNum)
 	int temp=1<<8;
 	for(auto it=targetRow->begin();it!=targetRow->end();++it)
 	{
-		if((*it)->getFight()<temp)
+		if((*it)->getFight()<temp && (*it)->getFight()!=0)
 			temp=(*it)->getFight();
 	}
 	for(auto it=targetRow->begin();it!=targetRow->end();++it)
 	{
-		if((*it)->getFight()==temp)
+		if((*it)->getFight()==temp && (*it)->getFight()!=0)
 			vec->push_back(*it);
 	}
 }
@@ -338,12 +338,12 @@ void GameField::findStrongestInRow(std::vector<GameUnit *> *vec, int rowNum)
 	int temp=-1;
 	for(auto it=targetRow->begin();it!=targetRow->end();++it)
 	{
-		if((*it)->getFight()>temp)
+		if((*it)->getFight()>temp && (*it)->getFight()!=0)
 			temp=(*it)->getFight();
 	}
 	for(auto it=targetRow->begin();it!=targetRow->end();++it)
 	{
-		if((*it)->getFight()==temp)
+		if((*it)->getFight()==temp && (*it)->getFight()!=0)
 			vec->push_back(*it);
 	}
 }
@@ -378,14 +378,14 @@ void GameField::findNear(std::vector<GameUnit *> *vec, int rowNum,GameUnit* targ
 		i=1;
 		while(true)
 		{
-			if(count<maxNum && index-i>=0)
+			if(count<maxNum && index-i>=0 && (*(it-i))->getFight()!=0)
 			{
 				vec->push_back((*(it-i)));
 				count++;
 			}
 			if(count==maxNum)
 				break;
-			if(count<maxNum && it+i!=targetRow->end())
+			if(count<maxNum && it+i!=targetRow->end() && (*(it+i))->getFight()!=0)
 			{
 				vec->push_back((*(it+i)));
 				count++;
@@ -400,7 +400,7 @@ void GameField::findNear(std::vector<GameUnit *> *vec, int rowNum,GameUnit* targ
 	case 1:
 		count=0;
 		index-=1;
-		for(auto temp_it=it-1;index>=0 && count<=maxNum;--temp_it)
+		for(auto temp_it=it-1;index>=0 && count<=maxNum && (*temp_it)->getFight()!=0;--temp_it)
 		{
 			vec->push_back(*temp_it);
 			count++;
@@ -408,7 +408,7 @@ void GameField::findNear(std::vector<GameUnit *> *vec, int rowNum,GameUnit* targ
 		break;
 	case 2:
 		count=0;
-		for(auto temp_it=it+1;temp_it!=targetRow->end() && count<=maxNum;++temp_it)
+		for(auto temp_it=it+1;temp_it!=targetRow->end() && count<=maxNum && (*temp_it)->getFight()!=0;++temp_it)
 		{
 			vec->push_back(*temp_it);
 			count++;
@@ -673,6 +673,7 @@ void GameField::deployCards(GameUnit *unit, int rowNum, int index)
 	std::vector<GameUnit*> *targetRow=getRowByNum(rowNum);
 	auto targetIt=targetRow->begin()+index;
 	targetRow->insert(targetIt,unit);
+	unit->setRowNum(rowNum);
 	emit rowChanged(rowNum);
 	emit newCardDeployed(unit);
 }
@@ -686,6 +687,7 @@ void GameField::deployCards(GameUnit *unit, int rowNum, GameUnit *target)
 		if((*targetIt)==target)
 			break;
 	targetRow->insert(targetIt,unit);
+	unit->setRowNum(rowNum);
 	emit rowChanged(rowNum);
 	emit newCardDeployed(unit);
 }
@@ -807,6 +809,8 @@ void GameField::generateNCard(int id, int rowNum, int index, int N)
 	{
 		auto it=targetRow->begin()+index;
 		GameUnit *unit=new GameUnit(id);
+		unit->setRowNum(rowNum);
+		//TODO SET SIDE
 		targetRow->insert(it,unit);
 		connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
 		emit newCardDeployed(unit);
@@ -828,7 +832,26 @@ void GameField::generateNCard(int id, int rowNum, std::vector<GameUnit *> *_targ
 		}
 
 		GameUnit *unit=new GameUnit(id);
+		unit->setRowNum(rowNum);
+		//TODO SET SIDE
 		targetRow->insert(it,unit);
+		connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
+		emit newCardDeployed(unit);
+	}
+	emit rowChanged(rowNum);
+}
+
+void GameField::generateNCardWithOutChooseTarget(int id, int rowNum, int N,bool side)
+{
+	std::vector<GameUnit*> *targetRow=getRowByNum(rowNum);
+	qDebug()<<"here"<<id<<" "<<N<<" "<<rowNum;
+	//TODELETE
+	for(int i=0;i<N;++i)
+	{
+		GameUnit *unit=new GameUnit(id);
+		unit->setSide(side);
+		unit->setRowNum(rowNum);
+		targetRow->push_back(unit);
 		connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
 		emit newCardDeployed(unit);
 	}
@@ -837,7 +860,14 @@ void GameField::generateNCard(int id, int rowNum, std::vector<GameUnit *> *_targ
 
 void GameField::getRow(std::vector<GameUnit *> *vec, int rowNum)
 {
-	vec=getRowByNum(rowNum);
+	//vec=new std::vector<GameUnit*>;
+	std::vector<GameUnit*> *ori=nullptr;
+	ori=getRowByNum(rowNum);
+	for(auto it=ori->begin();it!=ori->end();++it)
+	{
+		if((*it)->getFight()!=0)
+			vec->push_back((*it));
+	}
 }
 
 void GameField::deployCardsFromBase(int id, int rowNum, int index, bool side, int type)
@@ -920,8 +950,8 @@ void GameField::deleteFromVector(GameUnit *target)
 			break;
 		count++;
 	}
-	emit rowChanged(target->getRowNum());
 	targetRow->erase(it);
+	emit rowChanged(target->getRowNum());
 }
 
 void GameField::addToCemetery(int id,bool side)
@@ -947,6 +977,6 @@ void GameField::deleteFromHandCard(GameUnit *target)
 		if((*it)==target)
 			break;
 	}
-	emit handCardChanged(target->getSide());
 	getHandCardBySide(target->getSide())->erase(it);
+	emit handCardChanged(target->getSide());
 }

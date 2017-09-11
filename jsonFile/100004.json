@@ -6,7 +6,7 @@
     "type":3,
     "position":"anywhere",
     "loyalty":false,
-    "timer":1,
+    "timer":2,
     "prepare":
     {
         "int":[["hurt",1],["max",5]],
@@ -20,7 +20,7 @@
             [
                 {
                     "name":"findWeakestInRow",
-                    "parameter":["weakest","chooseRow","max"]
+                    "parameter":["weakest","selfRow","max"]
                 },
                 {
                     "name":"damageByN",

@@ -20,7 +20,7 @@
             [
                 {
                     "name":"getRow",
-                    "parameter":["all","chooseRow"]
+                    "parameter":["all","selfRow"]
                 },
                 {
                     "name":"damageByN",
