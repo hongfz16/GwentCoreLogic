@@ -1,0 +1,13 @@
+{
+	"id":100007,
+	"name":"Bekker's Twisted Mirror",
+	"img":"bekkersTwistedMirror.png",
+	"fight":0,
+	"type":2,
+	"position":"anywhere",
+	"loyalty":true,
+	"timer":0,
+	"prepare":{
+		"int":
+	}
+}

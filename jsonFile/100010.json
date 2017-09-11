@@ -1,0 +1,31 @@
+{
+	"id":100010,
+	"name":"Roach",
+	"img":"roach.png",
+	"fight":4,
+	"type":2,
+	"position":"anywhere",
+	"loyalty":true,
+	"timer":0,
+	"prepare":
+	{
+		"int":[["id",100010],["rowNum",1],["index",0],["type",-1]]
+	},
+	"BasePassiveEffect":
+	{
+		"Condition":
+		{
+			//TODO
+		},
+		"steps":
+		{
+			"function":
+			[
+				{
+					"name":"deployCardsFromBase",
+					"parameter":["id","rowNum","index","this","type"]
+				}
+			]
+		}
+	}
+}

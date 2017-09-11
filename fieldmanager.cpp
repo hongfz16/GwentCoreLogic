@@ -96,7 +96,7 @@ void FieldManager::implementBasePassive()
 
 void FieldManager::implementCemeteryPassive()
 {
-	for(auto it=basePassiveEffects.begin();it!=basePassiveEffects.end();++it)
+	for(auto it=cemeteryPassiveEffects.begin();it!=cemeteryPassiveEffects.end();++it)
 	{
 		(*it)->implementEffect(turn);
 	}

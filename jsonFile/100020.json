@@ -1,0 +1,22 @@
+{
+    "id":100020,
+    "name":"Archgriffin",
+    "img":"archgriffin.png",
+    "fight":7,
+    "type":3,
+    "position":"anywhere",
+    "loyalty":true,
+    "timer":0,
+    "prepare":
+    {
+        "int":[["id",100001],["num",1]]
+    },
+    "DeployEffect":
+    {
+        "steps":
+        {
+            "name":"generateNCardWithOutChooseTarget",
+            "parameter":["id","selfRow","num","this"]
+        }
+    }
+}

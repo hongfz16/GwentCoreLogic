@@ -1,0 +1,27 @@
+{
+    "id":100024,
+    "name":"Arachas",
+    "img":"arachas.png",
+    "fight":3,
+    "type":3,
+    "position":"back",
+    "loyalty":true,
+    "timer":0,
+    "prepare":
+    {
+        "int":[["id",100024],["type",0],["index",0]]
+    },
+    "DeployEffect":
+    {
+        "steps":
+        {
+            "function":
+            [
+                {
+                    "name":"deployCardsFromBase",
+                    "parameter":["id","selfRow","index","this","type"]
+                }
+            ]
+        }
+    }
+}

@@ -1,7 +1,7 @@
 {
 	"id":100011,
 	"name":"Dagon",
-	"img":"",
+	"img":"dagon.png",
 	"fight":6,
     "type":4,
     "position":"anywhere",

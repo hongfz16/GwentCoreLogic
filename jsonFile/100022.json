@@ -1,0 +1,31 @@
+{
+    "id":100022,
+    "name":"Frightener",
+    "img":"frightener.png",
+    "fight":10,
+    "type":3,
+    "position":"anywhere",
+    "loyalty":false,
+    "timer":0,
+    "prepare":
+    {
+        "int":[["num",1]]
+    },
+    "DeployEffect":
+    {
+        "steps":
+        {
+            "function":
+            [
+                {
+                    "name":"peekNCardsFromBase",
+                    "parameter":["num","this"]
+                },
+                {
+                    "name":"moveTarget",
+                    "parameter":["chooseTarget","selfRow"]
+                }
+            ]
+        }
+    }
+}

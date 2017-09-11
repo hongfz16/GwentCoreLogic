@@ -1,0 +1,21 @@
+{
+    "id":100026,
+    "name":"Vran Warrior",
+    "img":"vranWarrior.png",
+    "fight":5,
+    "type":3,
+    "position":"anywhere",
+    "loyalty":true,
+    "timer":4,
+    "prepare":
+    {
+    },
+    "DeployEffect":
+    {
+//TODO
+    },
+    "RoutineEffect":
+    {
+
+    }
+}

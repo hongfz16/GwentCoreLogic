@@ -1,0 +1,44 @@
+{
+	"id":100008,
+	"name":"Geralt: Igni",
+	"img":"geraltIgni.png",
+	"fight":5,
+	"type":1,
+	"position":"anywhere",
+	"loyalty":true,
+	"timer":0,
+	"prepare":
+	{
+		"int":[["limit",25]],
+		"vector<GameUnit*>*":["strongest"]
+	},
+	"DeployEffect":
+	{
+		"condition":
+		{
+			"compare":
+			{
+				"para1":
+				{
+					"name":"getRowFight",
+					"parameter":["oppositeRow"]
+				},
+				"para2":25
+			}
+		},
+		"steps":
+		{
+			"function":
+			[
+				{
+					"name":"findStrongestInRow",
+					"parameter":["strongest","oppositeRow"]
+				},
+				{
+					"name":"destroyTarget",
+					"parameter":["strongest"]
+				}
+			]
+		}
+	}
+}

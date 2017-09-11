@@ -1,0 +1,31 @@
+{
+    "id":100015,
+    "name":"Woodland Spirit",
+    "img":"woodlandSpirit.png",
+    "fight":5,
+    "type":1,
+    "position":"anywhere",
+    "loyalty":true,
+    "timer":0,
+    "prepare":
+    {
+        "int":[["wolfnum",3],["wolfid",100029],["fognum",1],["fogid",100003]]
+    },
+    "DeployEffect":
+    {
+        "steps":
+        {
+            "function":
+            [
+                {
+                    "name":"generateNCard",
+                    "parameter":["wolfid","selfRow","self","wolfnum","this"]
+                },
+                {
+                    "name":"generateNCardWithOutChooseTarget",
+                    "parameter":["fogid","oppositeRow","fognum","this"]
+                }
+            ]
+        }
+    }
+}

@@ -1,9 +1,9 @@
 {
 	"id":100004,
 	"name":"Torrential Rain",
-	"img":"",
+	"img":"torrentialRain.png",
 	"fight":0,
-    "type":3,
+    "type":2,
     "position":"anywhere",
     "loyalty":false,
     "timer":2,

@@ -1,9 +1,9 @@
 {
 	"id":100002,
 	"name":"Biting Frost",
-    "img":"",
+    "img":"bitingFrost.png",
 	"fight":0,
-    "type":3,
+    "type":2,
     "position":"anywhere",
     "loyalty":false,
     "timer":2,

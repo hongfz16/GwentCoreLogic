@@ -1,0 +1,27 @@
+{
+    "id":100016,
+    "name":"Earth Elemental",
+    "img":"earthElemental.png",
+    "fight":6,
+    "type":3,
+    "position":"front",
+    "loyalty":true,
+    "timer":0,
+    "prepare":
+    {
+        "int":[["num",2],["id",100030]]
+    },
+    "DeployEffect":
+    {
+        "steps":
+        {
+            "function":
+            [
+                {
+                    "name":"generateNCardWithOutChooseTarget",
+                    "parameter":["id","selfRow","num","this"]
+                }
+            ]
+        }
+    }
+}

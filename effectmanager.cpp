@@ -128,7 +128,7 @@ bool EffectManager::judgeCompare(QJsonObject JOCompare)
 	QJsonValue JVPara2=JOCompare["para2"];
 	int para1=judgeCompareGetNum(JVPara1);
 	int para2=judgeCompareGetNum(JVPara2);
-	return (para1>para2) ? true:false;
+	return (para1>=para2) ? true:false;
 }
 
 int EffectManager::judgeCompareGetNum(QJsonValue JVNum)
@@ -360,9 +360,11 @@ void EffectManager::implementFuntion(QJsonObject funcOb)
 	}
 	if(funcName==QString("getRow"))
 	{
+#ifdef DEBUG
 		//TODELETE
 		int temp=getTargetInt(paraArray[1].toString());
 		qDebug()<<"getRow para:rowNum"<<temp;
+#endif
 		emit getRow(getTargetVec(paraArray[0].toString()),getTargetInt(paraArray[1].toString()));
 		return;
 	}

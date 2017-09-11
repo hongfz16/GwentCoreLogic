@@ -1,0 +1,36 @@
+{
+	"id":100009,
+	"name":"Thunderbolt Potion",
+	"img":"thunderboltPotion.png",
+	"fight":0,
+	"type":2,
+	"position":"anywhere",
+	"loyalty":true,
+	"timer":0,
+	"prepare":
+	{
+		"int":[["protection",2],["boost",3],["type",0],["num",3]],
+		"vector<GameUnit*>*":["near"]
+	},
+	"DeployEffect":
+	{
+		"steps":
+		{
+			"function":
+			[
+				{
+					"name":"findNear",
+					"parameter":["near","selfRow","self","type","num"]
+				},
+				{
+					"name":"boostByN",
+					"parameter":["near","boost"]
+				},
+				{
+					"name":"addProtectionByN",
+					"parameter":["near","protection"]
+				}
+			]
+		}
+	}
+}

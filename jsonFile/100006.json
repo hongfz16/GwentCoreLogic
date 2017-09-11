@@ -1,16 +1,16 @@
 {
-	"id":100005,
-	"name":"Lacerate",
-	"img":"lacerate.png",
+	"id":100006,
+	"name":"Commander's Horn",
+    "img":"commandersHorn.png",
 	"fight":0,
     "type":2,
     "position":"anywhere",
-    "loyalty":false,
+    "loyalty":true,
     "timer":0,
     "prepare":
     {
-        "int":[["hurt",3]],
-        "vector<GameUnit*>*":["all"]
+        "int":[["add",4],["unitNum",5],["type",0]],
+        "vector<GameUnit*>*":["near"]
     },
     "DeployEffect":
 	{
@@ -19,12 +19,12 @@
             "function":
             [
                 {
-                    "name":"getRow",
-                    "parameter":["all","selfRow"]
+                    "name":"findNear",
+                    "parameter":["near","selfRow","self","type","unitNum"]
                 },
                 {
-                    "name":"damageByN",
-                    "parameter":["all","hurt"]
+                    "name":"boostByN",
+                    "parameter":["near","add"]
                 },
                 {
                     "name":"destroyTarget",

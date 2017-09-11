@@ -1,0 +1,31 @@
+{
+    "id":100019,
+    "name":"Crone: Brewess",
+    "img":"croneBrewess.png",
+    "fight":6,
+    "type":3,
+    "position":"middle",
+    "loyalty":true,
+    "timer":0,
+    "prepare":
+    {
+        "int":[["id1",100017],["id2",100018],["index",0],["type",0]]
+    }
+    "DeployEffect"
+    {
+        "steps":
+        {
+            "function":
+            [
+                {
+                    "name":"deployCardsFromBase",
+                    "parameter":["id1","selfRow","index","this","type"]
+                },
+                {
+                    "name":"deployCardsFromBase",
+                    "parameter":["id2","selfRow","index","this","type"]
+                }
+            ]
+        }
+    }
+}

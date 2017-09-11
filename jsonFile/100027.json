@@ -1,0 +1,14 @@
+{
+    "id":100027,
+    "name":"Wild Hunt Rider",
+    "img":"wildHuntRider.png",
+    "fight":8,
+    "type":3,
+    "position":"anywhere",
+    "loyalty":true,
+    "timer":0,
+    "prepare":
+    {
+        "int":[["add",1]]
+    }
+}

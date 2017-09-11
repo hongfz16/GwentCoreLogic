@@ -1,45 +1,14 @@
 {
-	"id":100000,
-	"name":"test",
-	"fight":100,
-    "DeployEffect":
-	{
-		"condition":
-		{
-            "compare":
-            {
-                "para1":
-                {
-                    "name":"getRowPoint",
-                    "parameter":["targetNum","oppositeRow"],
-                    "return":"void"
-                },
-                "para2":20
-            }
-		},
-		"steps":
-		{
-            "function":[
-                {
-                    "name":"findWeakeastInRow",
-                    "parameter":["target","choose",3],
-                    "return":"void"
-                },
-                {
-                    "name":"damageByN",
-                    "parameter":["target",2],
-                    "return":"void"
-                }
+    "id":,
+    "name":"",
+    "img":"",
+    "fight":,
+    "type":,
+    "position":"",
+    "loyalty":,
+    "timer":,
+    "prepare":
+    {
 
-            ]
-		}
-	},
-    "RoutineEffect":
-	{
-
-	},
-    "DeadWish":
-	{
-
-	}
+    }
 }

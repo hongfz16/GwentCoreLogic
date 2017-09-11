@@ -1,0 +1,58 @@
+{
+    "id":100012,
+    "name":"Foglet",
+    "img":"foglet.png",
+    "fight":2,
+    "type":3,
+    "position":"anywhere",
+    "loyalty":true,
+    "timer":0,
+    "prepare":
+    {
+        "int":[["existid",100003],["id",100012],["index",0],["type",0]]
+    },
+    "BasePassiveEffect":
+    {
+        "condition":
+        {
+            "exist":
+            {
+
+            }
+        },
+        "steps":
+        {
+            "function":
+            [
+                {
+                    "name":"deployCardsFromBase",
+                    "parameter":["id","/*TODO findfog*/","index","this","type"]
+                }
+            ]
+        }
+    },
+    "CemeteryPassiveEffect":
+    {
+
+    },
+    "RoutineEffect":
+    {
+        "condition":
+        {
+            "notExist":
+            {
+
+            }
+        },
+        "steps":
+        {
+            "function":
+            [
+                {
+                    "name":"destroyTarget",
+                    "parameter":["self"]
+                }
+            ]
+        }
+    }
+}

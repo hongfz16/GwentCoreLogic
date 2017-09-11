@@ -1,0 +1,27 @@
+{
+    "id":100014,
+    "name":"Celaeno Harpy",
+    "img":"celaenoHarpy.png",
+    "fight":3,
+    "type":3,
+    "position":"anywhere",
+    "loyalty":true,
+    "timer":0,
+    "prepare":
+    {
+        "int":[["num",2],["id",100028]]
+    },
+    "DeployEffect":
+    {
+        "steps":
+        {
+            "function":
+            [
+                {
+                    "name":"generatorNCard",
+                    "parameter":["id","selfRow","self","num","this"]
+                }
+            ]
+        }
+    }
+}

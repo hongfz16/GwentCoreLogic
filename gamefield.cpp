@@ -874,7 +874,7 @@ void GameField::deployCardsFromBase(int id, int rowNum, int index, bool side, in
 {
 	std::vector<int> *targetBase=getBaseBySide(side);
 	std::vector<GameUnit*> *targetVec=getRowByNum(rowNum);
-	if(type==0)
+	if(type==0 || type==-1)
 	{
 		int count=0;
 		for(auto it=targetBase->begin();it!=targetBase->end();++it)
@@ -887,10 +887,21 @@ void GameField::deployCardsFromBase(int id, int rowNum, int index, bool side, in
 		}
 		for(int i=0;i<count;++i)
 		{
+			int myIndex=index;
+			int myRowNum=rowNum;
+			if(type==-1)
+			{
+				myRowNum=rand()%3*(side?1:-1);
+				targetVec=getRowByNum(myRowNum);
+				if(targetVec->empty())
+					myIndex=0;
+				else
+					myIndex=rand()%(targetVec->size());
+			}
 			GameUnit *unit=new GameUnit(id);
 			unit->setSide(side);
-			unit->setRowNum(rowNum);
-			targetVec->insert(targetVec->begin()+index,unit);
+			unit->setRowNum(myRowNum);
+			targetVec->insert(targetVec->begin()+myIndex,unit);
 			connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
 			emit newCardDeployed(unit);
 		}

@@ -1,0 +1,34 @@
+{
+    "id":100013,
+    "name":"Ge'els",
+    "img":"geels.png",
+    "fight":2,
+    "type":1,
+    "position":"anywhere",
+    "loyalty":true,
+    "timer":0,
+    "prepare":
+    {
+        "int":[["typegold",1],["typesilver",2]]
+    },
+    "DeployEffect":
+    {
+        "steps":
+        {
+            "function":
+            [
+                {
+                    "name":"peekSpecificCardFromBase",
+                    "parameter":["typegold","this"]
+                },
+                {
+                    "name":"peekSpecificCardFromBase",
+                    "parameter":["typesilver","this"]
+                },
+                {
+                    //TDOO
+                }
+            ]
+        }
+    }
+}
