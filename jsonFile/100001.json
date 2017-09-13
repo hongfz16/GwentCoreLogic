@@ -1,0 +1,32 @@
+{
+    "id":100001,
+    "name":"First Light",
+    "img":"nutral/firstLight.png",
+    "fight":0,
+    "type":2,
+    "position":"anywhere",
+    "loyalty":true,
+    "timer":0,
+    "prepare":
+    {
+        "QJsonArray":[100031,100032],
+        "int":[["N",1]]
+    },
+    "DeployEffect":
+    {
+        "steps":
+        {
+            "function":
+            [
+                {
+                    "name":"generateNCardWithOutChooseTarget",
+                    "parameter":["chooseCard","selfRow","N","this"]
+                },
+                {
+                    "name":"destroyTarget",
+                    "parameter":["self"]
+                }
+            ]
+        }
+    }
+}

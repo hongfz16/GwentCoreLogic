@@ -1,0 +1,35 @@
+{
+	"id":100031,
+	"name":"",
+    "img":"",
+    "fight":0,
+    "type":2,
+    "position":"",
+    "loyalty":,
+    "timer":,
+	"prepare":
+	{
+		"vector<GameUnit*>*":["weather"]
+	},
+	"DeployEffect":
+	{
+		"steps":
+		{
+			"function":
+			[
+				{
+					"name":"findWeather",
+					"parameter":["weather","this"]
+				},
+				{
+					"name":"destroyTarget",
+					"parameter":["weather"]
+				},
+				{
+					"name":"destroyTarget",
+					"parameter":["self"]
+				}
+			]
+		}
+	}
+}

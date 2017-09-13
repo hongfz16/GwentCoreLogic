@@ -1,0 +1,30 @@
+{
+    "id":100032,
+    "name":"",
+    "img":"",
+    "fight":0,
+    "type":2,
+    "position":"",
+    "loyalty":,
+    "timer":0,
+    "prepare":
+    {
+    },
+    "DeployEffect":
+    {
+        "steps":
+        {
+            "function":
+            [
+                {
+                    "name":"deployRandomCardFromBase",
+                    "parameter":["chooseTargetRowNum","chooseTargetIndex","this"]
+                },
+                {
+                    "name":"destroyTarget",
+                    "parameter":["self"]
+                }
+            ]
+        }
+    }
+}
