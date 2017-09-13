@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MyThread_t {
-    QByteArrayData data[21];
-    char stringdata0[278];
+    QByteArrayData data[22];
+    char stringdata0[296];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -51,7 +51,8 @@ QT_MOC_LITERAL(16, 185, 15), // "sendQJsonObject"
 QT_MOC_LITERAL(17, 201, 33), // "sendQJsonObjectAndWaitForResp..."
 QT_MOC_LITERAL(18, 235, 12), // "QJsonObject*"
 QT_MOC_LITERAL(19, 248, 15), // "waitForDrawCard"
-QT_MOC_LITERAL(20, 264, 13) // "waitForDeploy"
+QT_MOC_LITERAL(20, 264, 13), // "waitForDeploy"
+QT_MOC_LITERAL(21, 278, 17) // "waitForChooseCard"
 
     },
     "MyThread\0error\0\0QTcpSocket::SocketError\0"
@@ -61,7 +62,8 @@ QT_MOC_LITERAL(20, 264, 13) // "waitForDeploy"
     "sendSignalToController\0side\0readyRead\0"
     "disconnected\0sendQJsonObject\0"
     "sendQJsonObjectAndWaitForResponde\0"
-    "QJsonObject*\0waitForDrawCard\0waitForDeploy"
+    "QJsonObject*\0waitForDrawCard\0waitForDeploy\0"
+    "waitForChooseCard"
 };
 #undef QT_MOC_LITERAL
 
@@ -71,7 +73,7 @@ static const uint qt_meta_data_MyThread[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      11,   14, // methods
+      12,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -79,19 +81,20 @@ static const uint qt_meta_data_MyThread[] = {
        5,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    1,   69,    2, 0x06 /* Public */,
-       5,    1,   72,    2, 0x06 /* Public */,
-       8,    2,   75,    2, 0x06 /* Public */,
-      10,    1,   80,    2, 0x06 /* Public */,
-      12,    2,   83,    2, 0x06 /* Public */,
+       1,    1,   74,    2, 0x06 /* Public */,
+       5,    1,   77,    2, 0x06 /* Public */,
+       8,    2,   80,    2, 0x06 /* Public */,
+      10,    1,   85,    2, 0x06 /* Public */,
+      12,    2,   88,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-      14,    0,   88,    2, 0x0a /* Public */,
-      15,    0,   89,    2, 0x0a /* Public */,
-      16,    1,   90,    2, 0x0a /* Public */,
-      17,    1,   93,    2, 0x0a /* Public */,
-      19,    1,   96,    2, 0x0a /* Public */,
-      20,    1,   99,    2, 0x0a /* Public */,
+      14,    0,   93,    2, 0x0a /* Public */,
+      15,    0,   94,    2, 0x0a /* Public */,
+      16,    1,   95,    2, 0x0a /* Public */,
+      17,    1,   98,    2, 0x0a /* Public */,
+      19,    1,  101,    2, 0x0a /* Public */,
+      20,    1,  104,    2, 0x0a /* Public */,
+      21,    1,  107,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, 0x80000000 | 3,    4,
@@ -104,6 +107,7 @@ static const uint qt_meta_data_MyThread[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void, QMetaType::QJsonObject,   11,
+    QMetaType::Void, 0x80000000 | 18,   11,
     QMetaType::Void, 0x80000000 | 18,   11,
     QMetaType::Void, 0x80000000 | 18,   11,
     QMetaType::Void, 0x80000000 | 18,   11,
@@ -128,6 +132,7 @@ void MyThread::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, vo
         case 8: _t->sendQJsonObjectAndWaitForResponde((*reinterpret_cast< QJsonObject*(*)>(_a[1]))); break;
         case 9: _t->waitForDrawCard((*reinterpret_cast< QJsonObject*(*)>(_a[1]))); break;
         case 10: _t->waitForDeploy((*reinterpret_cast< QJsonObject*(*)>(_a[1]))); break;
+        case 11: _t->waitForChooseCard((*reinterpret_cast< QJsonObject*(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -196,13 +201,13 @@ int MyThread::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 11)
+        if (_id < 12)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 11;
+        _id -= 12;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 11)
+        if (_id < 12)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 11;
+        _id -= 12;
     }
     return _id;
 }

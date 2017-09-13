@@ -32,6 +32,9 @@ signals:
 	void newCardDeployed(GameUnit*);
 	void cardDestroyed(GameUnit*);
 
+	void targetEaten(bool eatenside);
+	void rowChangedCheckPassive();
+
 public slots:
 
 	void gameUnitChanged(GameUnit*target);
@@ -77,7 +80,7 @@ public slots:
 	void makePowerToN(std::vector<GameUnit*> *vec,int N);
 
 	void destroyTarget(std::vector<GameUnit*> *vec);
-	void destroyTarget(GameUnit *target);
+	void destroyTarget(GameUnit *target, bool nosignal);
 
 	void eatTarget(std::vector<GameUnit*> *vec,GameUnit *eator);
 
@@ -95,17 +98,30 @@ public slots:
 
 	void resurrectCardToRow(int id, bool cemeterySide, int rowNum, int index, int type);//CHANGED
 
-	void generateNCard(int id,int rowNum,int index,int N);
-	void generateNCard(int id, int rowNum, std::vector<GameUnit*> *_target, int N);
+	void generateNCard(int id, int rowNum, int index, int N, bool side);
+	void generateNCard(int id, int rowNum, std::vector<GameUnit*> *_target, int N, bool side);
 	void generateNCardWithOutChooseTarget(int id, int rowNum, int N, bool side);
 
 	void getRow(std::vector<GameUnit*> *vec,int rowNum);
 
+	void getRowIncludeWeather(std::vector<GameUnit *> *vec, int rowNum);
+
 	void deployCardsFromBase(int id,int rowNum,int index,bool side,int type);
+	void deployRandomCardFromBase(int rowNum, int index, bool side);
 
 
 	void clearRow(std::vector<GameUnit*> *row);
 
+
+	void updateHandCard(bool side, QJsonObject info);
+	void updateBase(bool side,QJsonObject info);
+
+	void exist(int id, bool *re, int type);
+
+	void throwCard(bool side);
+
+	void findWeather(std::vector<GameUnit*> *vec,bool side);
+	void getRight(GameUnit* self,std::vector<GameUnit*> *right);
 
 private:
 	std::vector<GameUnit*> myHandCard;
@@ -144,8 +160,8 @@ private:
 	int exchangeCard(int index, std::vector<GameUnit *> *handCard, std::vector<int> *base);
 
 public:
-    void setMyBase(std::vector<int>* _base);
-	void setOpBase(std::vector<int>* _base);
+	void setMyBase(std::vector<int> &_base);
+	void setOpBase(std::vector<int> &_base);
 
 	const std::vector<GameUnit*>* getMyFront();
     const std::vector<GameUnit*>* getMyMiddle();

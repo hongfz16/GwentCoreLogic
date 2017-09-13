@@ -8,6 +8,7 @@
 #include <QObject>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QJsonArray>
 #include "gameconstant.h"
 
 
@@ -37,6 +38,8 @@ public slots:
 	void waitForDrawCard(QJsonObject* info);
 
 	void waitForDeploy(QJsonObject* info);
+
+	void waitForChooseCard(QJsonObject *info);
 
 
 private:

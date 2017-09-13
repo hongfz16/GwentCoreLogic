@@ -30,5 +30,8 @@
         <file>jsonFile/100028.json</file>
         <file>jsonFile/100029.json</file>
         <file>jsonFile/100030.json</file>
+        <file>jsonFile/100001.json</file>
+        <file>jsonFile/100031.json</file>
+        <file>jsonFile/100032.json</file>
     </qresource>
 </RCC>

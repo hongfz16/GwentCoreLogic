@@ -3,10 +3,8 @@
 FieldManager::FieldManager(std::vector<int> *myBase, std::vector<int> *opBase, QObject *parent) : QObject(parent)
 {
 	myField=new GameField();
-
-	myField->setMyBase(myBase);
-	myField->setOpBase(opBase);
-
+	myField->setMyBase(*myBase);
+	myField->setOpBase(*opBase);
 	srand((unsigned)time(NULL));
 	turn=(rand()%2==0) ? false:true;
 
@@ -18,24 +16,44 @@ FieldManager::FieldManager(std::vector<int> *myBase, std::vector<int> *opBase, Q
 
 	connect(myField,SIGNAL(newCardDeployed(GameUnit*)),this,SLOT(newCardDeployed(GameUnit*)));
 	connect(myField,SIGNAL(cardDestroyed(GameUnit*)),this,SLOT(cardDestroyed(GameUnit*)));
-}
+	connect(myField,SIGNAL(targetEaten(bool)),this,SLOT(targetEaten(bool)));
+	connect(myField,SIGNAL(rowChangedCheckPassive()),this,SLOT(checkAllPassive()));
 
+	qDebug()<<"before init";
+	for(auto it=myBase->begin();it!=myBase->end();++it)
+	{
+		initBaseEffect((*it),true);
+	}
+	for(auto it=opBase->begin();it!=opBase->end();++it)
+	{
+		initBaseEffect((*it),false);
+	}
+
+	qDebug()<<"after init";
+}
+/*
+void FieldManager::eraseDuplication(std::vector<EffectManager *> *vec)
+{
+	std::vector<EffectManager*> *revec=new std::vector<EffectManager*>();
+	for(auto it=vec->begin();it!=vec->end();++it)
+	{
+		for(auto it=vec)
+	}
+}
+*/
 void FieldManager::implementInstant()
 {
 	if(instantEffects.empty())
 	{
-		//qDebug()<<"instant effect empty!";
+		qDebug()<<"instant effect empty!";
 		return;
 	}
 	for(auto it=instantEffects.begin();it!=instantEffects.end();++it)
 	{
 		(*it)->implementEffect(turn);
 	}
-	for(auto it=instantEffects.begin();it!=instantEffects.end();++it)
-	{
-		delete((*it));
-	}
 	instantEffects.clear();
+	qDebug()<<"implement instant effect";
 }
 
 void FieldManager::implementRoutine()
@@ -45,9 +63,16 @@ void FieldManager::implementRoutine()
 		qDebug()<<"routine effects empty!";
 		return;
 	}
-	for(auto it=routineEffects.begin();it!=routineEffects.end();++it)
+	for(auto it=routineEffects.begin();it!=routineEffects.end();)
 	{
 		(*it)->implementEffect(turn);
+		if((*it)->getNeedToBeDeleted())
+		{
+			delete(*it);
+			it=routineEffects.erase(it);
+		}
+		else
+			++it;
 	}
 }
 
@@ -62,6 +87,7 @@ void FieldManager::implementDeadWish()
 		delete((*it));
 	}
 	deadWish.clear();
+	qDebug()<<"implement deadwish";
 }
 
 void FieldManager::implementUnitDeadWish(GameUnit *unit)
@@ -71,6 +97,7 @@ void FieldManager::implementUnitDeadWish(GameUnit *unit)
 		if((*it)->getSelf()==unit)
 		{
 			(*it)->implementEffect(turn);
+			qDebug()<<"implement single deadwish";
 			delete(*it);
 			deadWish.erase(it);
 			break;
@@ -80,25 +107,68 @@ void FieldManager::implementUnitDeadWish(GameUnit *unit)
 
 void FieldManager::implementDeployPassive()
 {
-	for(auto it=deployPassiveEffects.begin();it!=deployPassiveEffects.end();++it)
+	for(auto it=deployPassiveEffects.begin();it!=deployPassiveEffects.end();)
 	{
-		(*it)->implementEffect(turn);
+		if((*it)->implementEffect(turn))
+		{
+			delete(*it);
+			it=deployPassiveEffects.erase(it);
+			qDebug()<<"implement deploy passive";
+		}
+		else
+		{
+			++it;
+		}
 	}
 }
 
 void FieldManager::implementBasePassive()
 {
-	for(auto it=basePassiveEffects.begin();it!=basePassiveEffects.end();++it)
+	qDebug()<<">>>check for basepassive";
+	for(auto it=basePassiveEffects.begin();it!=basePassiveEffects.end();)
 	{
-		(*it)->implementEffect(turn);
+		
+		EffectManager *temp=(*it);
+		it=basePassiveEffects.erase(it);
+		if(!temp->implementEffect(turn))
+		{
+			it=basePassiveEffects.insert(it, temp);
+			++it;
+		}
+		/*
+		if((*it)->implementEffect(turn))
+		{
+			delete(*it);
+			it=basePassiveEffects.erase(it);
+			qDebug()<<"implement base passive";
+		}
+		 
+		else
+		{
+			++it;
+			qDebug()<<"do not satisfy the condition";
+		}
+		 */
 	}
+	qDebug()<<">>>end check for basepassive";
+	if(basePassiveEffects.empty())
+		qDebug()<<"empty basepassiveeffects";
 }
 
 void FieldManager::implementCemeteryPassive()
 {
-	for(auto it=cemeteryPassiveEffects.begin();it!=cemeteryPassiveEffects.end();++it)
+	for(auto it=cemeteryPassiveEffects.begin();it!=cemeteryPassiveEffects.end();)
 	{
-		(*it)->implementEffect(turn);
+		if((*it)->implementEffect(turn))
+		{
+			delete(*it);
+			it=cemeteryPassiveEffects.erase(it);
+			qDebug()<<"implement cemetery passive";
+		}
+		else
+		{
+			++it;
+		}
 	}
 }
 
@@ -114,17 +184,20 @@ void FieldManager::firstDraw()
 	myInfo.insert("type","firstDraw");
 	opInfo.insert("type","firstDraw");
 	myThread->sendQJsonObject(myInfo);
-	opThread->sendQJsonObject(opInfo);
 	myThread->waitForDrawCard(&myInfo);
+	opThread->sendQJsonObject(opInfo);
 	opThread->waitForDrawCard(&opInfo);
 	if(myInfo.find("error")!=myInfo.end())
 	{
-		//TODO
-		//deal with connect broke
+		QJsonObject err;
+		err.insert("type","error");
+		opThread->sendQJsonObject(err);
 	}
 	else if(opInfo.find("error")!=opInfo.end())
 	{
-		//TODO
+		QJsonObject err;
+		err.insert("type","error");
+		myThread->sendQJsonObject(err);
 	}
 #ifdef DEBUG
 	else if(myInfo.find("cancel")!=myInfo.end() &&opInfo.find("cancel")!=opInfo.end())
@@ -133,35 +206,40 @@ void FieldManager::firstDraw()
 		qDebug()<<"here";
 	}
 #endif
-#ifndef DEBUG
+//#ifndef DEBUG
 	else
 	{
-		myField->updateHandCard(true,&myInfo);//TODO addfunc
-		myField->updateHandCard(false,&opInfo);//TODO
-		myField->updateBase(true,&myInfo);//TODO
-		myField->updateBase(false,&opInfo);//TODO
+		myField->updateHandCard(true,myInfo);
+		myField->updateHandCard(false,opInfo);
+		myField->updateBase(true,myInfo);
+		myField->updateBase(false,opInfo);
 	}
-#endif
+//#endif
 }
 
 void FieldManager::secondDraw()
 {
+	qDebug()<<"secondDrawCard";
 	myField->peekCards(CONSTANT::secondDrawNum);
 	QJsonObject myInfo,opInfo;
 	myInfo.insert("type","secondDraw");
 	opInfo.insert("type","secondDraw");
 	myThread->sendQJsonObject(myInfo);
-	opThread->sendQJsonObject(opInfo);
 	myThread->waitForDrawCard(&myInfo);
+	opThread->sendQJsonObject(opInfo);
 	opThread->waitForDrawCard(&opInfo);
+	qDebug()<<"qjsonobject return";
 	if(myInfo.find("error")!=myInfo.end())
 	{
-		//TODO
-		//deal with connect broke
+		QJsonObject err;
+		err.insert("type","error");
+		opThread->sendQJsonObject(err);
 	}
 	else if(opInfo.find("error")!=opInfo.end())
 	{
-		//TODO
+		QJsonObject err;
+		err.insert("type","error");
+		myThread->sendQJsonObject(err);
 	}
 #ifdef DEBUG
 	else if(myInfo.find("cancel")!=myInfo.end() &&opInfo.find("cancel")!=opInfo.end())
@@ -169,15 +247,15 @@ void FieldManager::secondDraw()
 		return;
 	}
 #endif
-#ifndef DEBUG
+//#ifndef DEBUG
 	else
 	{
-		myField->updateHandCard(true,&myInfo);//TODO addfunc
-		myField->updateHandCard(false,&opInfo);//TODO
-		myField->updateBase(true,&myInfo);//TODO
-		myField->updateBase(false,&opInfo);//TODO
+		myField->updateHandCard(true,myInfo);
+		myField->updateHandCard(false,opInfo);
+		myField->updateBase(true,myInfo);
+		myField->updateBase(false,opInfo);
 	}
-#endif
+//#endif
 }
 
 void FieldManager::thirdDraw()
@@ -187,17 +265,20 @@ void FieldManager::thirdDraw()
 	myInfo.insert("type","thirdDraw");
 	opInfo.insert("type","thirdDraw");
 	myThread->sendQJsonObject(myInfo);
-	opThread->sendQJsonObject(opInfo);
 	myThread->waitForDrawCard(&myInfo);
+	opThread->sendQJsonObject(opInfo);
 	opThread->waitForDrawCard(&opInfo);
 	if(myInfo.find("error")!=myInfo.end())
 	{
-		//TODO
-		//deal with connect broke
+		QJsonObject err;
+		err.insert("type","error");
+		opThread->sendQJsonObject(err);
 	}
 	else if(opInfo.find("error")!=opInfo.end())
 	{
-		//TODO
+		QJsonObject err;
+		err.insert("type","error");
+		myThread->sendQJsonObject(err);
 	}
 #ifdef DEBUG
 	else if(myInfo.find("cancel")!=myInfo.end() &&opInfo.find("cancel")!=opInfo.end())
@@ -205,15 +286,15 @@ void FieldManager::thirdDraw()
 		return;
 	}
 #endif
-#ifndef DEBUG
+//#ifndef DEBUG
 	else
 	{
-		myField->updateHandCard(true,&myInfo);//TODO addfunc
-		myField->updateHandCard(false,&opInfo);//TODO
-		myField->updateBase(true,&myInfo);//TODO
-		myField->updateBase(false,&opInfo);//TODO
+		myField->updateHandCard(true,myInfo);
+		myField->updateHandCard(false,opInfo);
+		myField->updateBase(true,myInfo);
+		myField->updateBase(false,opInfo);
 	}
-#endif
+//#endif
 }
 
 void FieldManager::newRound()
@@ -223,9 +304,8 @@ void FieldManager::newRound()
 	opPass=false;
 }
 
-int FieldManager::settlement()
+int FieldManager::settlement(QJsonObject *re,int count)
 {
-	//TODO
 	//return 1 if my win
 	//return 2 if op win
 	//return 3 if draw
@@ -238,16 +318,20 @@ int FieldManager::settlement()
 	 */
 	int myRoundPoint=getMyPoint();
 	int opRoundPoint=getOpPoint();
+	re->insert(QString::number(count)+"My",myRoundPoint);
+	re->insert(QString::number(count)+"Op",opRoundPoint);
 	int returnValue=0;
 	if(myRoundPoint > opRoundPoint)
 	{
 		++myScore;
 		returnValue=1;
+		turn=true;
 	}
 	else if(myRoundPoint < opRoundPoint)
 	{
 		++opScore;
 		returnValue=2;
+		turn=true;
 	}
 	else
 	{
@@ -255,24 +339,40 @@ int FieldManager::settlement()
 		++opScore;
 		returnValue=3;
 	}
+	disconnect(myField,SIGNAL(rowChangedCheckPassive()),this,SLOT(checkAllPassive()));
 	myField->roundClear();
+	//routineEffects.clear();
+	connect(myField,SIGNAL(rowChangedCheckPassive()),this,SLOT(checkAllPassive()));
+	QJsonObject settle;
+	settle["type"]="settle";
+	settle["myScore"]=myScore;
+	settle["opScore"]=opScore;
+	myThread->sendQJsonObject(settle);
+	opThread->sendQJsonObject(settle);
+	round++;
+	return returnValue;
 }
 
-void FieldManager::gameOver()
+void FieldManager::gameOver(QJsonObject re)
 {
-//TODO
+	re.insert("type","gameover");
+	myThread->sendQJsonObject(re);
+	opThread->sendQJsonObject(re);
+	exit(0);
 }
 
 void FieldManager::addEffect(int _id,GameUnit *target,int type=0)
 {
 	CardManager cm(_id);
 	EffectManager *em=nullptr;
+	EffectManager *temp=nullptr;
 	if(target!=nullptr)
 	{
 		if(cm.haveDeployEffect())
 		{
 			em=new EffectManager(_id,turn,target,0);
-			instantEffects.push_back(em);
+			temp=em;
+			//instantEffects.push_back(em);
 		}
 		if(cm.haveRoutineEffect())
 		{
@@ -352,7 +452,7 @@ void FieldManager::addEffect(int _id,GameUnit *target,int type=0)
 
 	connect(em,SIGNAL(resurrectCardToRow(int,bool,int,int,int)),myField,SLOT(resurrectCardToRow(int,bool,int,int,int)));
 
-	connect(em,SIGNAL(generateNCard(int,int,std::vector<GameUnit*>*,int)),myField,SLOT(generateNCard(int,int,std::vector<GameUnit*>*,int)));
+	connect(em,SIGNAL(generateNCard(int,int,std::vector<GameUnit*>*,int,bool)),myField,SLOT(generateNCard(int,int,std::vector<GameUnit*>*,int,bool)));
 
 	connect(em,SIGNAL(getRow(std::vector<GameUnit*>*,int)),myField,SLOT(getRow(std::vector<GameUnit*>*,int)));
 
@@ -362,22 +462,40 @@ void FieldManager::addEffect(int _id,GameUnit *target,int type=0)
 
 	connect(em,SIGNAL(EffectChooseTarget(QJsonObject*)),this,SLOT(receiveEffectChooseTarget(QJsonObject*)));
 
+	connect(em,SIGNAL(EffectChooseCard(QJsonObject*)),this,SLOT(receiveEffectChooseCard(QJsonObject*)));
+
 	connect(em,SIGNAL(generateNCardWithOutChooseTarget(int,int,int,bool)),myField,SLOT(generateNCardWithOutChooseTarget(int,int,int,bool)));
 
+	connect(em,SIGNAL(exist(int,bool*,int)),myField,SLOT(exist(int,bool*,int)));
+
+	connect(em,SIGNAL(findWeather(std::vector<GameUnit*>*,bool)),myField,SLOT(findWeather(std::vector<GameUnit*>*,bool)));
+
+	connect(em,SIGNAL(getRight(GameUnit*,std::vector<GameUnit*>*)),myField,SLOT(getRight(GameUnit*,std::vector<GameUnit*>*)));
+
+	connect(em,SIGNAL(deployRandomCardFromBase(int,int,bool)),myField,SLOT(deployRandomCardFromBase(int,int,bool)));
+
+	connect(em,SIGNAL(getRowIncludeWeather(std::vector<GameUnit*>*,int)),myField,SLOT(getRowIncludeWeather(std::vector<GameUnit*>*,int)));
 	}
+	if(temp!=nullptr)
+		temp->implementEffect(turn);
 }
 
 void FieldManager::initBaseEffect(int _id, bool side)
 {
+	for(auto it=basePassiveEffects.begin();it!=basePassiveEffects.end();++it)
+	{
+		if((*it)->getUnitId()==_id && (*it)->getSide()==side)
+			return;
+	}
+	//basePassiveEffects.clear();
 	CardManager cm(_id);
 	EffectManager *em=nullptr;
 	if(cm.haveBasePassiveEffect())
 	{
 		em=new EffectManager(_id,side,nullptr,4);
 		basePassiveEffects.push_back(em);
-	}
-	if(em!=nullptr)
-	{
+		qDebug()<<"add new base effect "<<_id << basePassiveEffects.size();
+
 	connect(em,SIGNAL(findWeakestInRow(std::vector<GameUnit*>*,int)),myField,SLOT(findWeakestInRow(std::vector<GameUnit*>*,int)));
 
 	connect(em,SIGNAL(findWeakestInRow(std::vector<GameUnit*>*,int,int)),myField,SLOT(findWeakestInRow(std::vector<GameUnit*>*,int,int)));
@@ -386,7 +504,7 @@ void FieldManager::initBaseEffect(int _id, bool side)
 
 	connect(em,SIGNAL(findStrongestInRow(std::vector<GameUnit*>*,int,int)),myField,SLOT(findStrongestInRow(std::vector<GameUnit*>*,int,int)));
 
-	connect(em,SIGNAL(findNear(std::vector<GameUnit*>*,int,int,GameUnit*,int,int)),myField,SLOT(findNear(std::vector<GameUnit*>*,int,int,GameUnit*,int,int)));
+	connect(em,SIGNAL(findNear(std::vector<GameUnit*>*,int,GameUnit*,int,int)),myField,SLOT(findNear(std::vector<GameUnit*>*,int,GameUnit*,int,int)));
 
 	connect(em,SIGNAL(findWeakestInAll(std::vector<GameUnit*>*)),myField,SLOT(findWeakestInAll(std::vector<GameUnit*>*)));
 
@@ -424,7 +542,7 @@ void FieldManager::initBaseEffect(int _id, bool side)
 
 	connect(em,SIGNAL(resurrectCardToRow(int,bool,int,int,int)),myField,SLOT(resurrectCardToRow(int,bool,int,int,int)));
 
-	connect(em,SIGNAL(generateNCard(int,int,GameUnit*,int)),myField,SLOT(generateNCard(int,int,GameUnit*,int)));
+	connect(em,SIGNAL(generateNCard(int,int,std::vector<GameUnit*>*,int,bool)),myField,SLOT(generateNCard(int,int,std::vector<GameUnit*>*,int,bool)));
 
 	connect(em,SIGNAL(getRow(std::vector<GameUnit*>*,int)),myField,SLOT(getRow(std::vector<GameUnit*>*,int)));
 
@@ -433,6 +551,15 @@ void FieldManager::initBaseEffect(int _id, bool side)
 	connect(em,SIGNAL(EffectChooseRow(QJsonObject*)),this,SLOT(receiveEffectChooseRow(QJsonObject*)));
 
 	connect(em,SIGNAL(EffectChooseTarget(QJsonObject*)),this,SLOT(receiveEffectChooseTarget(QJsonObject*)));
+
+	connect(em,SIGNAL(exist(int,bool*,int)),myField,SLOT(exist(int,bool*,int)));
+
+	connect(em,SIGNAL(findWeather(std::vector<GameUnit*>*,bool)),myField,SLOT(findWeather(std::vector<GameUnit*>*,bool)));
+
+	connect(em,SIGNAL(getRight(GameUnit*,std::vector<GameUnit*>*)),myField,SLOT(getRight(GameUnit*,std::vector<GameUnit*>*)));
+
+	connect(em,SIGNAL(deployRandomCardFromBase(int,int,bool)),myField,SLOT(deployRandomCardFromBase(int,int,bool)));
+
 	}
 }
 
@@ -459,6 +586,17 @@ void FieldManager::deleteEffect(int effectType,int id,GameUnit* unit=nullptr)
 	case 5:
 		targetVec=&cemeteryPassiveEffects;
 		break;
+	}
+	if(effectType==1)
+	{
+		for(auto it=targetVec->begin();it!=targetVec->end();++it)
+		{
+			if((*it)->getSelf()==unit)
+			{
+				(*it)->setDeleteLater();
+				break;
+			}
+		}
 	}
 	if(unit==nullptr)
 	{
@@ -509,13 +647,17 @@ bool FieldManager::commonChooseCardAndDeploy(bool side)
 	}
 	if(info.find("error")!=info.end())
 	{
-		//TODO
-		//deal with connection break
+		QJsonObject err;
+		err.insert("type","error");
+		if(!side)
+			myThread->sendQJsonObject(err);
+		else
+			opThread->sendQJsonObject(err);
 	}
 	else if(info.find("exception")!=info.end() && info["exception"].toString()==QString("timeout"))
 	{
-		//TODO
-		//punish timeout
+		throwOneCard(side);
+		return false;
 	}
 	else if(info.find("pass")!=info.end())
 	{
@@ -583,13 +725,19 @@ void FieldManager::receiveEffectChooseTarget(QJsonObject *info)
 		emit effectChooseTargetOpThread(info);
 }
 
+void FieldManager::receiveEffectChooseCard(QJsonObject *info)
+{
+	if(turn)
+		emit effectChooseCardMyThread(info);
+	else
+		emit effectChooseCardOpThread(info);
+}
+
 void FieldManager::newCardDeployed(GameUnit *unit)
 {
 	addEffect(unit->getCardId(),unit,0);
-	//TODELETE
-	//qDebug()<<"new card deployed signal and slot";
-	//TODO
-	//IMPLEMENT INSTANT EFFECT ??
+	qDebug()<<unit->getCardId();
+	//implementInstant();
 }
 
 void FieldManager::cardDestroyed(GameUnit *unit)
@@ -597,6 +745,61 @@ void FieldManager::cardDestroyed(GameUnit *unit)
 	implementUnitDeadWish(unit);
 	deleteEffect(1,unit->getCardId(),unit);
 	addEffect(unit->getCardId(),nullptr,2);
+}
+
+void FieldManager::throwOneCard(bool side)
+{
+	myField->throwCard(side);
+	qDebug()<<"throwcard";
+}
+
+void FieldManager::checkAllPassive()
+{
+	qDebug()<<"check all passive";
+	implementBasePassive();
+	implementDeployPassive();
+	implementCemeteryPassive();
+	qDebug()<<"check all passive end";
+}
+
+void FieldManager::targetEaten(bool eatenside)
+{
+	for(auto it=deployPassiveEffects.begin();it!=deployPassiveEffects.end();)
+	{
+		if((*it)->implementEffect(eatenside,1))
+		{
+			delete(*it);
+			it=deployPassiveEffects.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
+	for(auto it=basePassiveEffects.begin();it!=basePassiveEffects.end();)
+	{
+		if((*it)->implementEffect(eatenside,1))
+		{
+			delete(*it);
+			it=basePassiveEffects.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
+	for(auto it=cemeteryPassiveEffects.begin();it!=cemeteryPassiveEffects.end();)
+	{
+		if((*it)->implementEffect(eatenside,1))
+		{
+			delete(*it);
+			it=basePassiveEffects.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
 }
 
 int FieldManager::getMyPoint()
@@ -658,6 +861,7 @@ void FieldManager::setMyThread(MyThread *th)
 
 	connect(this,SIGNAL(effectChooseRowMyThread(QJsonObject*)),myThread,SLOT(sendQJsonObjectAndWaitForResponde(QJsonObject*)));
 	connect(this,SIGNAL(effectChooseTargetMyThread(QJsonObject*)),myThread,SLOT(sendQJsonObjectAndWaitForResponde(QJsonObject*)));
+	connect(this,SIGNAL(effectChooseCardMyThread(QJsonObject*)),myThread,SLOT(waitForChooseCard(QJsonObject*)));
 }
 
 void FieldManager::setOpThread(MyThread *th)
@@ -671,6 +875,7 @@ void FieldManager::setOpThread(MyThread *th)
 
 	connect(this,SIGNAL(effectChooseRowOpThread(QJsonObject*)),opThread,SLOT(sendQJsonObjectAndWaitForResponde(QJsonObject*)));
 	connect(this,SIGNAL(effectChooseTargetOpThread(QJsonObject*)),opThread,SLOT(sendQJsonObjectAndWaitForResponde(QJsonObject*)));
+	connect(this,SIGNAL(effectChooseCardOpThread(QJsonObject*)),myThread,SLOT(waitForChooseCard(QJsonObject*)));
 }
 
 bool FieldManager::isOtherPassed()

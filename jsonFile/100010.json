@@ -13,9 +13,10 @@
 	},
 	"BasePassiveEffect":
 	{
-		"Condition":
+        "condition":
 		{
-			//TODO
+			"type":1,
+			"exist":[100008,100011,100013,100015,100021,100023]
 		},
 		"steps":
 		{

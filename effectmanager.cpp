@@ -2,7 +2,7 @@
 
 EffectManager::EffectManager(int id, bool _side, GameUnit *target, int effectType, QObject *parent) : QObject(parent), self(target),side(_side)
 {
-	cm=new CardManager(target->getCardId());
+	cm=new CardManager(id);
 	timer=0;
 	unitId=id;
 	needTimer=false;
@@ -42,6 +42,7 @@ EffectManager::EffectManager(int id, bool _side, GameUnit *target, int effectTyp
 	//TODELETE
 	//QJsonDocument temp(effectJson);
 	//qDebug()<<temp.toJson();
+	needToBeDeleted=false;
 }
 
 std::vector<GameUnit *> *EffectManager::getTargetVec(QString key)
@@ -64,6 +65,17 @@ std::vector<GameUnit *> *EffectManager::getTargetVec(QString key)
 
 int EffectManager::getTargetInt(QString key)
 {
+	if(key==QString("chooseTargetRowNum"))
+	{
+		chooseTarget();
+		return intMap["chooseTargetRowNum"];
+	}
+	if(key==QString("chooseCard"))
+	{
+		intMap["chooseCard"]=chooseCard(arrMap["QJsonArray"]);
+		qDebug()<<"implement chooseCard once";
+		return intMap["chooseCard"];
+	}
 	auto it=intMap.find(key);
 	if(it==intMap.end())
 	{
@@ -115,9 +127,11 @@ bool EffectManager::judgeCondition(QJsonObject JOCondition)
 		return judgeCompare((*it).toObject());
 	}
 	it=JOCondition.find("exist");
-	if(it!=JOCondition.end())
+	auto itt=JOCondition.find("notExist");
+	if(it!=JOCondition.end() || itt!=JOCondition.end())
 	{
-		return judgeExist((*it).toObject());
+		qDebug()<<"from judgeCondition enter judgeExist";
+		return judgeExist(JOCondition);
 	}
 	return true;
 }
@@ -170,7 +184,37 @@ int EffectManager::judgeCompareGetNum(QJsonValue JVNum)
 
 bool EffectManager::judgeExist(QJsonObject JOCompare)
 {
-//TODO
+	QJsonArray arr;
+	bool choose;
+	int type=JOCompare["type"].toInt();
+	///0 all 1 my -1 op
+	if(!side) type=-type;
+	if(JOCompare.find("exist")!=JOCompare.end())
+	{
+		arr=JOCompare["exist"].toArray();
+		choose=true;
+	}
+	else if(JOCompare.find("notExist")!=JOCompare.end())
+	{
+		arr=JOCompare["notExist"].toArray();
+		choose=false;
+	}
+	bool *re=new bool();
+	for(auto it=arr.begin();it!=arr.end();++it)
+	{
+		qDebug()<<"send exist signal";
+		emit exist((*it).toInt(),re,type);
+		qDebug()<<"exist signal return";
+		if((*re)==true && choose==true)
+		{
+			return true;
+		}
+		else if((*re)==false && choose==false)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void EffectManager::implementFuntion(QJsonObject funcOb)
@@ -267,6 +311,7 @@ void EffectManager::implementFuntion(QJsonObject funcOb)
 	QJsonArray paraArray=funcOb["parameter"].toArray();
 	if(funcName==QString("damageByN"))
 	{
+#ifdef DEBUG
 		std::vector<GameUnit*> *targetvec=nullptr;
 		targetvec=getTargetVec(paraArray[0].toString());
 		qDebug()<<"print all in the targetvec";
@@ -276,22 +321,23 @@ void EffectManager::implementFuntion(QJsonObject funcOb)
 		{
 			qDebug()<<(*it)->getName();
 		}
-		emit damageByN(getTargetVec(paraArray[0].toString()),intMap[paraArray[1].toString()]);
+#endif
+		emit damageByN(getTargetVec(paraArray[0].toString()),getTargetInt(paraArray[1].toString()));
 		return;
 	}
 	if(funcName==QString("damageByNUnseenProtection"))
 	{
-		emit damageByNUnseenProtection(getTargetVec(paraArray[0].toString()),intMap[paraArray[1].toString()]);
+		emit damageByNUnseenProtection(getTargetVec(paraArray[0].toString()),getTargetInt(paraArray[1].toString()));
 		return;
 	}
 	if(funcName==QString("boostByN"))
 	{
-		emit boostByN(getTargetVec(paraArray[0].toString()),intMap[paraArray[1].toString()]);
+		emit boostByN(getTargetVec(paraArray[0].toString()),getTargetInt(paraArray[1].toString()));
 		return;
 	}
 	if(funcName==QString("addProtectionByN"))
 	{
-		emit addProtectionByN(getTargetVec(paraArray[0].toString()),intMap[paraArray[1].toString()]);
+		emit addProtectionByN(getTargetVec(paraArray[0].toString()),getTargetInt(paraArray[1].toString()));
 		return;
 	}
 	if(funcName==QString("lockTarget"))
@@ -301,7 +347,7 @@ void EffectManager::implementFuntion(QJsonObject funcOb)
 	}
 	if(funcName==QString("makePowerToN"))
 	{
-		emit makePowerToN(getTargetVec(paraArray[0].toString()),intMap[paraArray[1].toString()]);
+		emit makePowerToN(getTargetVec(paraArray[0].toString()),getTargetInt(paraArray[1].toString()));
 		return;
 	}
 	if(funcName==QString("destroyTarget"))
@@ -316,7 +362,7 @@ void EffectManager::implementFuntion(QJsonObject funcOb)
 	}
 	if(funcName==QString("moveTarget"))
 	{
-		emit moveTarget(getTargetVec(paraArray[0].toString()),intMap[paraArray[1].toString()]);
+		emit moveTarget(getTargetVec(paraArray[0].toString()),getTargetInt(paraArray[1].toString()));
 		return;
 	}
 	if(funcName==QString("peekNCardsFromBase"))
@@ -326,36 +372,42 @@ void EffectManager::implementFuntion(QJsonObject funcOb)
 	}
 	if(funcName==QString("peekSpecificCardFromBase"))
 	{
-		emit peekSpecificCardFromBase(intMap[paraArray[0].toString()],boolMap[paraArray[1].toString()]);
+		emit peekSpecificCardFromBase(getTargetInt(paraArray[0].toString()),boolMap[paraArray[1].toString()]);
 		return;
 	}
 	if(funcName==QString("deployCardsFromBase"))
 	{
-		emit deployCardsFromBase(intMap[paraArray[0].toString()],intMap[paraArray[1].toString()],intMap[paraArray[2].toString()],boolMap[paraArray[3].toString()],intMap[paraArray[4].toString()]);
+		qDebug()<<"deploycardsfrombase signal send";
+		emit deployCardsFromBase(getTargetInt(paraArray[0].toString()),getTargetInt(paraArray[1].toString()),getTargetInt(paraArray[2].toString()),boolMap[paraArray[3].toString()],getTargetInt(paraArray[4].toString()));
+		qDebug()<<"deploycardsfrombase signal end";
 		return;
 	}
 	if(funcName==QString("putCardBackToBase"))
 	{
-		emit putCardBackToBase(getTargetUnit(paraArray[0].toString()),intMap[paraArray[1].toString()],boolMap[paraArray[2].toString()]);
+		emit putCardBackToBase(getTargetUnit(paraArray[0].toString()),getTargetInt(paraArray[1].toString()),boolMap[paraArray[2].toString()]);
 		return;
 	}
 	if(funcName==QString("resurrectCardToHand"))
 	{
-		emit resurrectCardToHand(intMap[paraArray[0].toString()],boolMap[paraArray[1].toString()],boolMap[paraArray[2].toString()],intMap[paraArray[3].toString()]);
+		emit resurrectCardToHand(getTargetInt(paraArray[0].toString()),boolMap[paraArray[1].toString()],boolMap[paraArray[2].toString()],getTargetInt(paraArray[3].toString()));
 		return;
 	}
 	if(funcName==QString("resurrectCardToRow"))
 	{
-		emit resurrectCardToRow(intMap[paraArray[0].toString()],boolMap[paraArray[1].toString()],intMap[paraArray[2].toString()],intMap[paraArray[3].toString()],intMap[paraArray[4].toString()]);
+		emit resurrectCardToRow(getTargetInt(paraArray[0].toString()),boolMap[paraArray[1].toString()],getTargetInt(paraArray[2].toString()),getTargetInt(paraArray[3].toString()),getTargetInt(paraArray[4].toString()));
 	}
 	if(funcName==QString("generateNCard"))
 	{
-		emit generateNCard(intMap[paraArray[0].toString()],intMap[paraArray[1].toString()],getTargetVec(paraArray[2].toString()),intMap[paraArray[3].toString()]);
+		qDebug()<<"generateNCard signal sent";
+		emit generateNCard(getTargetInt(paraArray[0].toString()),getTargetInt(paraArray[1].toString()),getTargetVec(paraArray[2].toString()),getTargetInt(paraArray[3].toString()),boolMap[paraArray[4].toString()]);
+		qDebug()<<"generateNCard signal end";
 		return;
 	}
 	if(funcName==QString("generateNCardWithOutChooseTarget"))
 	{
+		//qDebug()<<"Start generate";
 		emit generateNCardWithOutChooseTarget(getTargetInt(paraArray[0].toString()),getTargetInt(paraArray[1].toString()),getTargetInt(paraArray[2].toString()),boolMap[paraArray[3].toString()]);
+		//qDebug()<<"end generate"<<getTargetInt(paraArray[0].toString());
 		return;
 	}
 	if(funcName==QString("getRow"))
@@ -368,7 +420,35 @@ void EffectManager::implementFuntion(QJsonObject funcOb)
 		emit getRow(getTargetVec(paraArray[0].toString()),getTargetInt(paraArray[1].toString()));
 		return;
 	}
-
+	if(funcName==QString("deployRandomCardFromBase"))
+	{
+		qDebug()<<"DeplyRandomCard signal send";
+		emit deployRandomCardFromBase(getTargetInt(paraArray[0].toString()),getTargetInt(paraArray[1].toString()),boolMap[paraArray[2].toString()]);
+		qDebug()<<"DeployRandomCard end";
+		return;
+	}
+	if(funcName==QString("findWeather"))
+	{
+		emit findWeather(getTargetVec(paraArray[0].toString()),boolMap[paraArray[1].toString()]);
+		return;
+	}
+	if(funcName==QString("getRight"))
+	{
+		qDebug()<<"getright signal send";
+		qDebug()<<getTargetUnit(paraArray[0].toString())->getCardId();
+		emit getRight(getTargetUnit(paraArray[0].toString()),getTargetVec(paraArray[1].toString()));
+		qDebug()<<"getright signal return";
+		return;
+	}
+	if(funcName==QString("getTargetFight"))
+	{
+		intMap[paraArray[1].toString()]=getTargetFight(getTargetVec(paraArray[0].toString()));
+	}
+	if(funcName==QString("findSpecWeather"))
+	{
+		intMap[paraArray[2].toString()]=findSpecWeather(boolMap[paraArray[0].toString()],getTargetInt(paraArray[1].toString()));
+		intMap[paraArray[2].toString()+"Reverse"]=-intMap[paraArray[2].toString()];
+	}
 }
 
 int EffectManager::transRowNum(QString rowInfo)
@@ -498,41 +578,65 @@ void EffectManager::prepare()
 			}
 
 		}
+		if(it.key()=="QJsonArray")
+		{
+			QJsonArray arr=it.value().toArray();
+			arrMap["QJsonArray"]=arr;
+		}
 	}
 }
 
-void EffectManager::implementEffect(bool turn)
+int EffectManager::findSpecWeather(bool _side,int _id)
 {
-//	if(side!=turn)
-//	{
-//		qDebug()<<"side!=turn";
-//		return;
-//	}
+	std::vector<GameUnit*> *temp=new std::vector<GameUnit*>();
+	emit findWeather(temp,_side);
+	for(auto it=temp->begin();it!=temp->end();++it)
+	{
+		if((*it)->getCardId()==_id)
+			return (*it)->getRowNum();
+	}
+}
+
+bool EffectManager::implementEffect(bool turn,int type)
+{
+	qDebug()<<"<start>implement effect</start>" << unitId;
 	if(!myTimerUp())
 	{
 		qDebug()<<"!myTimeup() "<<timer;
 		updateTimer();
-		return;
+		return false;
 	}
 	auto it=effectJson.find("condition");
 	if(it!=effectJson.end())
 	{
+		qDebug()<<"have condition";
 		if(!judgeCondition((*it).toObject()))
-			return;
+			return false;
+	}
+	qDebug()<<"do not have condition";
+	it=effectJson.find("waitForEaten");
+	if(it!=effectJson.end() && type!=1)
+	{
+		return false;
+	}
+	else if(it!=effectJson.end() && type==1 && turn!=side)
+	{
+		return false;
 	}
 	it=effectJson.find("steps");
 	if(it==effectJson.end())
 	{
-		return;
+		return false;
 	}
 	QJsonArray JAFunctions=((*it).toObject())["function"].toArray();
 	for(auto arrayit=JAFunctions.begin();arrayit!=JAFunctions.end();++arrayit)
 	{
 		implementFuntion((*arrayit).toObject());
 		//TODELETE
-		qDebug()<<"implement effect";
+		qDebug()<<"<end>implement effect</end> " << unitId;
 	}
 	resetTimer();
+	return true;
 }
 
 void EffectManager::updateTimer()
@@ -551,6 +655,7 @@ int EffectManager::chooseRow()
 {
 	QJsonObject info;
 	QJsonArray arr;
+	/*
 	if(cm->getPosition()==QString("anywhere"))
 	{
 		if(cm->getLoyalty() == side)
@@ -568,15 +673,27 @@ int EffectManager::chooseRow()
 	}
 	else
 	{
-		int temp=cm->getPosition().toInt();
+		int temp=0;
+		if(cm->getPosition()=="front")
+			temp=1;
+		if(cm->getPosition()=="middle")
+			temp=2;
+		if(cm->getPosition()=="back")
+			temp=3;
 		if(cm->getLoyalty() == side)
 			arr.append(temp);
 		else
 			arr.append(-temp);
 	}
+	*/
+	for(int i=1;i<=3;++i){
+		arr.append(i);
+		arr.append(-i);
+	}
 	info.insert("type","EffectChooseRow");
 	info.insert("rowRange",arr);
 	info.insert("wait",CONSTANT::waitForEffectTargetChoose);
+	info.insert("side",side);
 	emit EffectChooseRow(&info);
 
 	intMap["chooseRow"]=info["rowNum"].toInt();
@@ -587,6 +704,7 @@ std::vector<GameUnit *> *EffectManager::chooseTarget()
 {
 	QJsonObject info;
 	QJsonArray arr;
+	/*
 	if(cm->getPosition()==QString("anywhere"))
 	{
 		if(cm->getLoyalty() == side)
@@ -604,22 +722,52 @@ std::vector<GameUnit *> *EffectManager::chooseTarget()
 	}
 	else
 	{
-		int temp=cm->getPosition().toInt();
+		int temp=0;
+		if(cm->getPosition()=="front")
+			temp=1;
+		if(cm->getPosition()=="middle")
+			temp=2;
+		if(cm->getPosition()=="back")
+			temp=3;
 		if(cm->getLoyalty() == side)
 			arr.append(temp);
 		else
 			arr.append(-temp);
+	}*/
+	for(int i=1;i<=3;++i){
+		arr.append(i);
+		arr.append(-i);
 	}
 	info.insert("type","EffectChooseTarget");
 	info.insert("rowRange",arr);
 	info.insert("wait",CONSTANT::waitForEffectTargetChoose);
+	info.insert("side",side);
 	emit EffectChooseTarget(&info);
-
 	int rowNum=info["rowNum"].toInt();
 	std::vector<GameUnit*> *tempVec=new std::vector<GameUnit*>();
-	emit getRow(tempVec,rowNum);
-	auto it=tempVec->begin()+info["index"].toInt();
+	emit getRowIncludeWeather(tempVec,rowNum);
+
+	auto it=tempVec->begin()+(info["index"].toInt());
+	qDebug()<<"after use begin";
 	std::vector<GameUnit*> *reVec=new std::vector<GameUnit*>();
 	reVec->push_back((*it));
+
+	intMap["chooseTargetRowNum"]=rowNum;
+	qDebug()<<"add choose target rowNum"<<rowNum;
+	intMap["chooseTargetIndex"]=info["index"].toInt();
+	qDebug()<<"add choose target index"<<info["index"].toInt();
 	return reVec;
+}
+
+int EffectManager::chooseCard(QJsonArray arr)
+{
+	QJsonObject info;
+	info.insert("type","EffectChooseCard");
+	info.insert("range",arr);
+	emit EffectChooseCard(&info);
+
+	int chosen=info["chosen"].toInt();
+	int left=info["left"].toInt();
+	intMap["left"]=left;
+	return chosen;
 }

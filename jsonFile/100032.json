@@ -1,15 +1,9 @@
 {
     "id":100032,
-    "name":"",
-    "img":"",
+    "name":"chongzhen",
     "fight":0,
     "type":2,
     "position":"",
-    "loyalty":,
-    "timer":0,
-    "prepare":
-    {
-    },
     "DeployEffect":
     {
         "steps":

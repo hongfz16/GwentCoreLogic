@@ -49,6 +49,7 @@ void GameUnit::decreaseFight(int num, bool protectionUnseen)
     }
 
 	emit stateChanged(this);
+	qDebug()<<">>>>>>>decreaseFight!!!";
 }
 
 void GameUnit::addFight(int num)

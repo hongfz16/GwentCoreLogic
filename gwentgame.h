@@ -11,7 +11,7 @@ class GwentGame : public QObject
 {
 	Q_OBJECT
 public:
-	explicit GwentGame(MyThread *myThread,MyThread *opThread,QObject *parent = nullptr);
+	explicit GwentGame(MyThread *_myThread, MyThread *_opThread, QObject *parent = nullptr);
 
 	void startGame();
 

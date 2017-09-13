@@ -8,6 +8,40 @@
 	"loyalty":true,
 	"timer":0,
 	"prepare":{
-		"int":
+		"int":[["maxNum",1]],
+		"vector<GameUnit*>*":["strongest","weakest"]
+	},
+	"DeployEffect":
+	{
+		"steps":
+		{
+			"function":
+			[
+				{
+					"name":"findStrongestInAll",
+					"parameter":["strongest","maxNum"]
+				},
+				{
+					"name":"findWeakestInAll",
+					"parameter":["weakest","maxNum"]
+				},
+				{
+					"name":"getTargetFight",
+					"parameter":["strongest","strongestFight"]
+				},
+				{
+					"name":"getTargetFight",
+					"parameter":["weakest","weakestFight"]
+				},
+				{
+					"name":"makePowerToN",
+					"parameter":["strongest","weakestFight"]
+				},
+				{
+					"name":"makePowerToN",
+					"parameter":["weakest","strongestFight"]
+				}
+			]
+		}
 	}
 }

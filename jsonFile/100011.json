@@ -3,12 +3,13 @@
 	"name":"Dagon",
 	"img":"dagon.png",
 	"fight":6,
-    "type":4,
+    "type":1,
     "position":"anywhere",
     "loyalty":true,
     "timer":0,
     "prepare":
     {
+        "QJsonArray":[100002,100003,100004],
         "int":[["id",100003],["N",1]]
     },
     "DeployEffect":
@@ -19,7 +20,7 @@
     		[
     			{
                     "name":"generateNCardWithOutChooseTarget",
-                    "parameter":["id","chooseRow","N","this"]
+                    "parameter":["chooseCard","chooseRow","N","this"]
     			}
     		]
     	}

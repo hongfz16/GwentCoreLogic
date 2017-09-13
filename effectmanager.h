@@ -75,14 +75,15 @@ signals:
 
 	//void resurrectCard(int id, bool cemeterySide,bool resurrectSide);
 
-	void generateNCard(int id, int rowNum,std::vector<GameUnit*> *_target, int N);
+	void generateNCard(int id, int rowNum,std::vector<GameUnit*> *_target, int N,bool side);
 
 	void generateNCardWithOutChooseTarget(int id,int rowNum,int N,bool side);
 
 	void getRow(std::vector<GameUnit*> *vec,int rowNum);
-
+	void getRowIncludeWeather(std::vector<GameUnit*> *vec,int rowNum);
 
 	void deployCardsFromBase(int id,int rowNum,int index,bool side,int type);
+	void deployRandomCardFromBase(int rowNum,int index,bool side);
 
 	void deployCards(GameUnit *unit, int rowNum, int index);
 	void deployCards(GameUnit *unit, int rowNum, GameUnit *target);
@@ -94,6 +95,13 @@ signals:
 	//ADD
 	void EffectChooseRow(QJsonObject *info);
 	void EffectChooseTarget(QJsonObject *info);
+
+	void EffectChooseCard(QJsonObject *info);
+
+	void exist(int id,bool *re,int type);
+
+	void findWeather(std::vector<GameUnit*> *vec,bool side);
+	void getRight(GameUnit* self,std::vector<GameUnit*> *right);
 
 private:
 	CardManager *cm;
@@ -113,6 +121,8 @@ private:
 	QMap<QString,bool> boolMap;
 
 	QMap<QString,GameUnit*> unitMap;
+
+	QMap<QString,QJsonArray> arrMap;
 
 	std::vector<GameUnit*> *getTargetVec(QString key);
 	int getTargetInt(QString key);
@@ -143,16 +153,26 @@ private:
 
 	void prepare();
 
+	int findSpecWeather(bool _side, int _id);
+
+	bool needToBeDeleted;
+
 public slots:
-	void implementEffect(bool turn);
+	bool implementEffect(bool turn, int type=0);
 	void updateTimer();//before implement
 	void resetTimer();//after implement
 
 	int chooseRow();
 	std::vector<GameUnit*> *chooseTarget();
+	int chooseCard(QJsonArray arr);
 
 	GameUnit* getSelf() {return self;}
 	int getUnitId() {return unitId;}
+	bool getSide() {return side;}
+
+	bool getNeedToBeDeleted() {return needToBeDeleted;}
+
+	void setDeleteLater() {needToBeDeleted=true;}
 };
 
 #endif // EFFECTMANAGER_H

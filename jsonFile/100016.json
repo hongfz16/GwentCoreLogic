@@ -11,7 +11,7 @@
     {
         "int":[["num",2],["id",100030]]
     },
-    "DeployEffect":
+    "DeadWish":
     {
         "steps":
         {
@@ -20,6 +20,19 @@
                 {
                     "name":"generateNCardWithOutChooseTarget",
                     "parameter":["id","selfRow","num","this"]
+                }
+            ]
+        }
+    },
+    "DeployEffect":
+    {
+        "steps":
+        {
+            "function":
+            [
+                {
+                    "name":"lockTarget",
+                    "parameter":["self"]
                 }
             ]
         }

@@ -68,4 +68,6 @@ dependencies: /Users/hongfz/Github/gwentCorelogic/mythread.cpp mythread.h \
   /Users/hongfz/Qt5/5.9.1/clang_64/lib/QtCore.framework/Headers/qjsonvalue.h \
   ../../Qt5/5.9.1/clang_64/lib/QtCore.framework/Headers/QJsonDocument \
   ../../Qt5/5.9.1/clang_64/lib/QtCore.framework/Headers/qjsondocument.h \
+  ../../Qt5/5.9.1/clang_64/lib/QtCore.framework/Headers/QJsonArray \
+  ../../Qt5/5.9.1/clang_64/lib/QtCore.framework/Headers/qjsonarray.h \
   gameconstant.h

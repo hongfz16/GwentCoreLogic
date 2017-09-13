@@ -1,6 +1,6 @@
 {
     "id":100018,
-    "name":"Crone: Whispess",
+    "name":"Crone Whispess",
     "img":"croneWhispess.png",
     "fight":6,
     "type":3,
@@ -10,8 +10,8 @@
     "prepare":
     {
         "int":[["id1",100017],["id2",100019],["index",0],["type",0]]
-    }
-    "DeployEffect"
+    },
+    "DeployEffect":
     {
         "steps":
         {

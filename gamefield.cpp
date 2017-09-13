@@ -39,7 +39,9 @@ void GameField::gameUnitChanged(GameUnit *target)
 	info.insert("fight",target->getFight());
 	info.insert("protection",target->getProtection());
 	info.insert("locked",target->isLocked());
+	//qDebug()<<">>>>>>>before unitchanged";
 	emit gameUnitChangedToClient(info);
+	//qDebug()<<">>>>>>unitchanged";
 }
 
 void GameField::rowChangedSlot(int rowNum)
@@ -55,6 +57,7 @@ void GameField::rowChangedSlot(int rowNum)
 	info.insert("rowNum",rowNum);
 	info.insert("sequence",arr);
 	emit rowChangedToClient(info);
+	emit rowChangedCheckPassive();
 }
 
 void GameField::baseChangedSlot(bool side)
@@ -102,14 +105,14 @@ void GameField::handCardChangedSlot(bool side)
 	emit handCardChangedToClient(info);
 }
 
-void GameField::setMyBase(std::vector<int> *_base)
+void GameField::setMyBase(std::vector<int> &_base)
 {
-	myBase=*_base;
+	myBase=_base;
 }
 
-void GameField::setOpBase(std::vector<int> *_base)
+void GameField::setOpBase(std::vector<int> &_base)
 {
-	opBase=*_base;
+	opBase=_base;
 }
 
 const std::vector<GameUnit *> *GameField::getMyFront()
@@ -291,13 +294,6 @@ int GameField::exchangeCard(int index,std::vector<GameUnit*> *handCard,std::vect
 	auto it=base->begin()+(rand()%static_cast<int>(base->size()));
 	base->insert(it,id);
 	return (*handCard)[index]->getCardId();
-}
-
-
-//TODO
-void choseByPlayer(std::vector<GameUnit*>& vec, int numToChose)
-{
-//unneeded choose operation taken care of by effectmanager
 }
 
 
@@ -571,7 +567,7 @@ void GameField::destroyTarget(std::vector<GameUnit *> *vec)
 {
 	for(auto it=vec->begin();it!=vec->end();++it)
 	{
-		if((*it)->getRowNum()>0)
+		if((*it)->getSide())
 			addToCemetery((*it)->getCardId(),true);
 		else
 			addToCemetery((*it)->getCardId(),false);
@@ -590,7 +586,7 @@ void GameField::destroyTarget(std::vector<GameUnit *> *vec)
 	}
 }
 
-void GameField::destroyTarget(GameUnit *target)
+void GameField::destroyTarget(GameUnit *target,bool nosignal=false)
 {
 	if(target->getRowNum()>0)
 		addToCemetery(target->getCardId(),true);
@@ -605,18 +601,22 @@ void GameField::destroyTarget(GameUnit *target)
 			break;
 		count++;
 	}
-	deleteFromVector(target);
+	if(!nosignal)
+		deleteFromVector(target);
 	emit cardDestroyed(target);
 	delete(target);
 }
 
 void GameField::eatTarget(std::vector<GameUnit *> *vec, GameUnit *eator)
 {
+	bool eatenSide;
 	for(auto it=vec->begin();it!=vec->end();++it)
 	{
+		eatenSide=(*it)->getSide();
 		eator->addFight((*it)->getFight());
 	}
 	destroyTarget(vec);
+	emit targetEaten(eator->getSide());
 }
 
 void GameField::moveTarget(std::vector<GameUnit *> *vec, int toRow)
@@ -671,6 +671,19 @@ void GameField::deployCards(GameUnit *unit, int rowNum, int index)
 {
 	deleteFromHandCard(unit);
 	std::vector<GameUnit*> *targetRow=getRowByNum(rowNum);
+	int id=unit->getCardId();
+	if(CONSTANT::allWeather.find(id)!=CONSTANT::allWeather.end())
+	{
+		for(auto it=targetRow->begin();it!=targetRow->end();++it)
+		{
+			int tempid=(*it)->getCardId();
+			if(CONSTANT::allWeather.find(tempid)!=CONSTANT::allWeather.end())
+			{
+				destroyTarget((*it));
+				break;
+			}
+		}
+	}
 	auto targetIt=targetRow->begin()+index;
 	targetRow->insert(targetIt,unit);
 	unit->setRowNum(rowNum);
@@ -682,6 +695,19 @@ void GameField::deployCards(GameUnit *unit, int rowNum, GameUnit *target)
 {
 	deleteFromHandCard(unit);
 	std::vector<GameUnit*> *targetRow=getRowByNum(rowNum);
+	int id=unit->getCardId();
+	if(CONSTANT::allWeather.find(id)!=CONSTANT::allWeather.end())
+	{
+		for(auto it=targetRow->begin();it!=targetRow->end();++it)
+		{
+			int tempid=(*it)->getCardId();
+			if(CONSTANT::allWeather.find(tempid)!=CONSTANT::allWeather.end())
+			{
+				destroyTarget((*it));
+				break;
+			}
+		}
+	}
 	auto targetIt=targetRow->begin();
 	for(;targetIt!=targetRow->end();++targetIt)
 		if((*targetIt)==target)
@@ -721,6 +747,20 @@ void GameField::resurrectCardToRow(int id, bool cemeterySide, int rowNum, int in
 {
 	std::vector<int> *targetCeme=getCemeteryBySide(cemeterySide);
 	std::vector<GameUnit*> *targetRow=getRowByNum(rowNum);
+
+	if(CONSTANT::allWeather.find(id)!=CONSTANT::allWeather.end())
+	{
+		for(auto it=targetRow->begin();it!=targetRow->end();++it)
+		{
+			int tempid=(*it)->getCardId();
+			if(CONSTANT::allWeather.find(tempid)!=CONSTANT::allWeather.end())
+			{
+				destroyTarget((*it));
+				break;
+			}
+		}
+	}
+
 	bool resurrectSide;
 	if(rowNum>0) resurrectSide=true;
 	else resurrectSide=false;
@@ -802,15 +842,27 @@ void GameField::resurrectCardToHand(int id, bool cemeterySide, bool resurrectSid
 	emit handCardChanged(resurrectSide);
 }
 
-void GameField::generateNCard(int id, int rowNum, int index, int N)
+void GameField::generateNCard(int id, int rowNum, int index, int N,bool side)
 {
 	std::vector<GameUnit*> *targetRow=getRowByNum(rowNum);
+	if(CONSTANT::allWeather.find(id)!=CONSTANT::allWeather.end())
+	{
+		for(auto it=targetRow->begin();it!=targetRow->end();++it)
+		{
+			int tempid=(*it)->getCardId();
+			if(CONSTANT::allWeather.find(tempid)!=CONSTANT::allWeather.end())
+			{
+				destroyTarget((*it));
+				break;
+			}
+		}
+	}
 	for(int i=0;i<N;++i)
 	{
 		auto it=targetRow->begin()+index;
 		GameUnit *unit=new GameUnit(id);
 		unit->setRowNum(rowNum);
-		//TODO SET SIDE
+		unit->setSide(side);
 		targetRow->insert(it,unit);
 		connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
 		emit newCardDeployed(unit);
@@ -818,9 +870,21 @@ void GameField::generateNCard(int id, int rowNum, int index, int N)
 	emit rowChanged(rowNum);
 }
 
-void GameField::generateNCard(int id, int rowNum, std::vector<GameUnit *> *_target, int N)
+void GameField::generateNCard(int id, int rowNum, std::vector<GameUnit *> *_target, int N,bool side)
 {
 	std::vector<GameUnit*> *targetRow=getRowByNum(rowNum);
+	if(CONSTANT::allWeather.find(id)!=CONSTANT::allWeather.end())
+	{
+		for(auto it=targetRow->begin();it!=targetRow->end();++it)
+		{
+			int tempid=(*it)->getCardId();
+			if(CONSTANT::allWeather.find(tempid)!=CONSTANT::allWeather.end())
+			{
+				destroyTarget((*it));
+				break;
+			}
+		}
+	}
 	GameUnit *target=(*_target)[0];
 	for(int i=0;i<N;++i)
 	{
@@ -833,7 +897,7 @@ void GameField::generateNCard(int id, int rowNum, std::vector<GameUnit *> *_targ
 
 		GameUnit *unit=new GameUnit(id);
 		unit->setRowNum(rowNum);
-		//TODO SET SIDE
+		unit->setSide(side);
 		targetRow->insert(it,unit);
 		connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
 		emit newCardDeployed(unit);
@@ -844,8 +908,20 @@ void GameField::generateNCard(int id, int rowNum, std::vector<GameUnit *> *_targ
 void GameField::generateNCardWithOutChooseTarget(int id, int rowNum, int N,bool side)
 {
 	std::vector<GameUnit*> *targetRow=getRowByNum(rowNum);
-	qDebug()<<"here"<<id<<" "<<N<<" "<<rowNum;
+	//qDebug()<<"here"<<id<<" "<<N<<" "<<rowNum;
 	//TODELETE
+	if(CONSTANT::allWeather.find(id)!=CONSTANT::allWeather.end())
+	{
+		for(auto it=targetRow->begin();it!=targetRow->end();++it)
+		{
+			int tempid=(*it)->getCardId();
+			if(CONSTANT::allWeather.find(tempid)!=CONSTANT::allWeather.end())
+			{
+				destroyTarget((*it));
+				break;
+			}
+		}
+	}
 	for(int i=0;i<N;++i)
 	{
 		GameUnit *unit=new GameUnit(id);
@@ -870,21 +946,52 @@ void GameField::getRow(std::vector<GameUnit *> *vec, int rowNum)
 	}
 }
 
+void GameField::getRowIncludeWeather(std::vector<GameUnit *> *vec, int rowNum)
+{
+	std::vector<GameUnit*> *ori=nullptr;
+	ori=getRowByNum(rowNum);
+	for(auto it=ori->begin();it!=ori->end();++it)
+	{
+		vec->push_back((*it));
+	}
+}
+
+
+
 void GameField::deployCardsFromBase(int id, int rowNum, int index, bool side, int type)
 {
 	std::vector<int> *targetBase=getBaseBySide(side);
 	std::vector<GameUnit*> *targetVec=getRowByNum(rowNum);
+	if(CONSTANT::allWeather.find(id)!=CONSTANT::allWeather.end())
+	{
+		for(auto it=targetVec->begin();it!=targetVec->end();++it)
+		{
+			int tempid=(*it)->getCardId();
+			if(CONSTANT::allWeather.find(tempid)!=CONSTANT::allWeather.end())
+			{
+				destroyTarget((*it));
+				break;
+			}
+		}
+	}
+	//qDebug()<<"get base and row";
 	if(type==0 || type==-1)
 	{
 		int count=0;
-		for(auto it=targetBase->begin();it!=targetBase->end();++it)
+		for(auto it=targetBase->begin();it!=targetBase->end();)
 		{
+			//qDebug()<<(*it);
 			if((*it)==id)
 			{
-				targetBase->erase(it);
+				it=targetBase->erase(it);
 				count++;
 			}
+			else
+			{
+				++it;
+			}
 		}
+		//qDebug()<<"erase all the id in the base";
 		for(int i=0;i<count;++i)
 		{
 			int myIndex=index;
@@ -903,17 +1010,23 @@ void GameField::deployCardsFromBase(int id, int rowNum, int index, bool side, in
 			unit->setRowNum(myRowNum);
 			targetVec->insert(targetVec->begin()+myIndex,unit);
 			connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
+			//qDebug()<<"so far so good";
 			emit newCardDeployed(unit);
+			emit rowChanged(myRowNum);
 		}
 	}
 	else
 	{
-		for(auto it=targetBase->begin();it!=targetBase->end();++it)
+		for(auto it=targetBase->begin();it!=targetBase->end();)
 		{
 			if((*it)==id)
 			{
-				targetBase->erase(it);
+				it=targetBase->erase(it);
 				break;
+			}
+			else
+			{
+				++it;
 			}
 		}
 		GameUnit *unit=new GameUnit(id);
@@ -922,31 +1035,247 @@ void GameField::deployCardsFromBase(int id, int rowNum, int index, bool side, in
 		targetVec->insert(targetVec->begin()+index,unit);
 		connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
 		emit newCardDeployed(unit);
+		emit rowChanged(rowNum);
 	}
+}
+
+void GameField::deployRandomCardFromBase(int rowNum, int index, bool side)
+{
+	std::vector<int> *targetBase=getBaseBySide(side);
+	srand((unsigned)time(NULL));
+	int randindex=rand()%(targetBase->size());
+	auto it=targetBase->begin()+randindex;
+	int id=(*it);
+	targetBase->erase(it);
+	emit baseChanged(side);
+qDebug()<<"before check weather";
+	std::vector<GameUnit*>*targetvec=getRowByNum(rowNum);
+	if(CONSTANT::allWeather.find(id)!=CONSTANT::allWeather.end())
+	{
+		for(auto it=targetvec->begin();it!=targetvec->end();++it)
+		{
+			int tempid=(*it)->getCardId();
+			if(CONSTANT::allWeather.find(tempid)!=CONSTANT::allWeather.end())
+			{
+				destroyTarget((*it));
+				break;
+			}
+		}
+	}
+qDebug()<<"after check weather";
+	GameUnit *unit=new GameUnit(id);
+	unit->setRowNum(rowNum);
+	unit->setSide(side);
+	connect(unit,SIGNAL(stateChanged(GameUnit*)),this,SLOT(gameUnitChanged(GameUnit*)));
+	targetvec->insert(targetvec->begin()+index,unit);
+	emit rowChanged(rowNum);
+	emit newCardDeployed(unit);
 }
 
 void GameField::roundClear()
 {
+	qDebug()<<"start clear";
 	clearRow(&opBack);
 	clearRow(&opMiddle);
 	clearRow(&opFront);
 	clearRow(&myBack);
 	clearRow(&myMiddle);
 	clearRow(&myFront);
+	qDebug()<<"end clear";
 }
 
 void GameField::clearRow(std::vector<GameUnit *> *row)
 {
-	for(auto it=row->begin();it!=row->end();++it)
+	for(auto it=row->begin();it!=row->end();)
 	{
 		if((*it)->isLocked())
 		{
 			(*it)->undoLock();
+			++it;
 		}
 		else
 		{
-			destroyTarget((*it));
+			GameUnit* temp=(*it);
+			destroyTarget(temp,true);
+			it=row->erase(it);
+			//delete(temp);
 		}
+	}
+}
+
+void GameField::updateHandCard(bool side, QJsonObject info)
+{
+	if(info.find("hand")==info.end())
+	{
+		qDebug()<<"drawcard: updateHandCard: can not find \"hand\"";
+		return;
+	}
+	std::vector<GameUnit*> *targethandcard=getHandCardBySide(side);
+	//for(auto it=targethandcard->begin();it!=targethandcard->end();++it)
+	//{
+		//delete((*it));
+	//}
+	targethandcard->clear();
+	QJsonArray handarr=info.find("hand").value().toArray();
+	for(auto it=handarr.begin();it!=handarr.end();++it)
+	{
+		qDebug()<<(*it).toInt();
+		GameUnit *unit=new GameUnit((*it).toInt());
+		unit->setRowNum(0);
+		unit->setSide(side);
+		targethandcard->push_back(unit);
+	}
+	emit handCardChanged(side);
+}
+
+void GameField::updateBase(bool side, QJsonObject info)
+{
+	if(info.find("base")==info.end())
+	{
+		qDebug()<<"drawcard: updatebase: can not find \"base\"";
+		return;
+	}
+	std::vector<int> *targetbase=getBaseBySide(side);
+	targetbase->clear();
+	QJsonArray basearr=info.find("base").value().toArray();
+	for(auto it=basearr.begin();it!=basearr.end();++it)
+	{
+		targetbase->push_back((*it).toInt());
+	}
+	emit baseChanged(side);
+}
+
+void GameField::exist(int id, bool *re,int type)
+{
+	qDebug()<<"start exist func";
+	qDebug()<<"finding "<<id<<" type: "<<type;
+	if(type==1 || type==0)
+	{
+		for(auto it=myFront.begin();it!=myFront.end();++it)
+		{
+			if((*it)->getCardId()==id)
+			{
+				*re=true;
+				return;
+			}
+		}
+		for(auto it=myMiddle.begin();it!=myMiddle.end();++it)
+		{
+			if((*it)->getCardId()==id)
+			{
+				*re=true;
+				return;
+			}
+		}
+		for(auto it=myBack.begin();it!=myBack.end();++it)
+		{
+			if((*it)->getCardId()==id)
+			{
+				*re=true;
+				return;
+			}
+		}
+	}
+	if(type==-1 || type==0)
+	{
+		for(auto it=opFront.begin();it!=opFront.end();++it)
+		{
+			if((*it)->getCardId()==id)
+			{
+				*re=true;
+				return;
+			}
+		}
+		for(auto it=opMiddle.begin();it!=opMiddle.end();++it)
+		{
+			if((*it)->getCardId()==id)
+			{
+				*re=true;
+				return;
+			}
+		}
+		for(auto it=opBack.begin();it!=opBack.end();++it)
+		{
+			if((*it)->getCardId()==id)
+			{
+				*re=true;
+				return;
+			}
+		}
+	}
+	*re=false;
+	qDebug()<<(*re)<<"exist func return";
+}
+
+void GameField::throwCard(bool side)
+{
+	std::vector<GameUnit*> *hand=getHandCardBySide(side);
+	srand((unsigned)time(NULL));
+	int index=rand()%hand->size();
+	delete((*hand)[index]);
+	hand->erase(hand->begin()+index);
+	emit handCardChanged(side);
+}
+
+void GameField::findWeather(std::vector<GameUnit *> *vec, bool side)
+{
+	std::vector<GameUnit*> *vec1=nullptr;
+	std::vector<GameUnit*> *vec2=nullptr;
+	std::vector<GameUnit*> *vec3=nullptr;
+
+	if(side)
+	{
+		vec1=getRowByNum(1);
+		vec2=getRowByNum(2);
+		vec3=getRowByNum(3);
+	}
+	else
+	{
+		vec1=getRowByNum(-1);
+		vec2=getRowByNum(-2);
+		vec3=getRowByNum(-3);
+	}
+	for(auto it=vec1->begin();it!=vec1->end();++it)
+	{
+		int id=(*it)->getCardId();
+		if(CONSTANT::allWeather.find(id)!=CONSTANT::allWeather.end())
+		{
+			vec->push_back((*it));
+		}
+	}
+	for(auto it=vec2->begin();it!=vec2->end();++it)
+	{
+		int id=(*it)->getCardId();
+		if(CONSTANT::allWeather.find(id)!=CONSTANT::allWeather.end())
+		{
+			vec->push_back((*it));
+		}
+	}
+	for(auto it=vec3->begin();it!=vec3->end();++it)
+	{
+		int id=(*it)->getCardId();
+		if(CONSTANT::allWeather.find(id)!=CONSTANT::allWeather.end())
+		{
+			vec->push_back((*it));
+		}
+	}
+}
+
+void GameField::getRight(GameUnit *self, std::vector<GameUnit *> *right)
+{
+	qDebug()<<"try to getright";
+	int rowNum=self->getRowNum();
+	std::vector<GameUnit*> *vec=getRowByNum(rowNum);
+	auto it=vec->begin();
+	for(it=vec->begin();it!=vec->end();++it)
+	{
+		if((*it)==self)
+			break;
+	}
+	if((it+1)!=vec->end())
+	{
+		qDebug()<<"found right";
+		right->push_back(*(it+1));
 	}
 }
 

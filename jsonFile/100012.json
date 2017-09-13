@@ -15,34 +15,52 @@
     {
         "condition":
         {
-            "exist":
-            {
-
-            }
+            "exist":[100003],
+            "type":-1
         },
         "steps":
         {
             "function":
             [
                 {
+                    "name":"findSpecWeather",
+                    "parameter":["that","existid","rowNum"]
+                },
+                {
                     "name":"deployCardsFromBase",
-                    "parameter":["id","/*TODO findfog*/","index","this","type"]
+                    "parameter":["id","rowNumReverse","index","this","type"]
                 }
             ]
         }
     },
     "CemeteryPassiveEffect":
     {
-
+        "condition":
+        {
+            "exist":[100003],
+            "type":-1
+        },
+        "steps":
+        {
+            "function":
+            [
+                {
+                    "name":"findSpecWeather",
+                    "parameter":["op","existid","rowNum"]
+                },
+                {
+                    "name":"resurrectCardToRow",
+                    "parameter":["id","this","rowNum","index","type"]
+                }
+            ]
+        }
     },
     "RoutineEffect":
     {
         "condition":
         {
-            "notExist":
-            {
-
-            }
+            "type":0,
+            "notExist":[100003]
         },
         "steps":
         {

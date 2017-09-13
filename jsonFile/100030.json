@@ -1,9 +1,9 @@
 {
     "id":100030,
-    "name":"",
+    "name":"cijituyuansu",
     "img":"",
-    "fight":,
-    "type":,
+    "fight":1,
+    "type":3,
     "position":"anywhere",
     "loyalty":true,
     "timer":0

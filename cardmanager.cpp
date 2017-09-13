@@ -137,6 +137,7 @@ bool CardManager::haveDeployPassiveEffect()
 
 bool CardManager::haveBasePassiveEffect()
 {
+	//qDebug()<<have(QString("BasePassiveEffect"));
 	return have(QString("BasePassiveEffect"));
 }
 

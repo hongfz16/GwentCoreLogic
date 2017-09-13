@@ -26,6 +26,9 @@ signals:
 	void effectChooseTargetMyThread(QJsonObject*);
 	void effectChooseTargetOpThread(QJsonObject*);
 
+	void effectChooseCardMyThread(QJsonObject*);
+	void effectChooseCardOpThread(QJsonObject*);
+
 private:
 	std::vector<EffectManager*> instantEffects;
 	std::vector<EffectManager*> routineEffects;
@@ -47,13 +50,13 @@ private:
 	int opScore;
 	int round;
 
+	//void eraseDuplication(std::vector<EffectManager*> *vec);
+
 
 public slots:
 	void implementInstant();
 	void implementRoutine();
 
-	//TODO
-	//need to add more signals to implement deadwish and passive
 	void implementDeadWish();
 	void implementUnitDeadWish(GameUnit *unit);
 	void implementDeployPassive();
@@ -62,15 +65,15 @@ public slots:
 
 	void shuffle();
 
-	void firstDraw();//TODO
-	void secondDraw();//TODO
-	void thirdDraw();//TODO
+	void firstDraw();
+	void secondDraw();
+	void thirdDraw();
 
-	void newRound();//TODO
-	int settlement();//TODO
-	void gameOver();//TODO
+	void newRound();
+	int settlement(QJsonObject *re, int count);
+	void gameOver(QJsonObject re);
 
-	void addEffect(int _id, GameUnit* target, int type);//TODO
+	void addEffect(int _id, GameUnit* target, int type);
 
 	void initBaseEffect(int _id, bool side);
 
@@ -80,7 +83,7 @@ public slots:
 
 	int getFightFromVec(const std::vector<GameUnit *> *vec);
 
-	bool commonChooseCardAndDeploy(bool side);//TODO
+	bool commonChooseCardAndDeploy(bool side);
 
 	void setPass(bool side);
 
@@ -88,9 +91,16 @@ public slots:
 
 	void receiveEffectChooseRow(QJsonObject *info);
 	void receiveEffectChooseTarget(QJsonObject *info);
+	void receiveEffectChooseCard(QJsonObject *info);
 
 	void newCardDeployed(GameUnit *unit);
 	void cardDestroyed(GameUnit *unit);
+
+	void throwOneCard(bool side);
+
+	void checkAllPassive();
+
+	void targetEaten(bool eatenside);
 
 public:
 	bool getTurn() {return turn;}
@@ -108,6 +118,8 @@ public:
 	void setOpThread(MyThread *th);
 
 	bool isOtherPassed();
+
+	bool isPass() {if(turn) return myPass; else return opPass;}
 
 	int getMyScore() {return myScore;}
 	int getOpScore() {return opScore;}

@@ -3,7 +3,7 @@
 
 #define DEBUG
 #include <iostream>
-
+#include <set>
 namespace CONSTANT {
 	const int firstDrawNum=10;
 	const int firstExchangeNum=3;
@@ -20,6 +20,8 @@ namespace CONSTANT {
 	const int waitForDeploy=30;
 	const int millisecPerSec=1000;
 	const int connectBreakJudge=30000;
+	const int temp[3]={100002,100003,100004};
+	const std::set<int> allWeather(temp,temp+3);
 }
 
 

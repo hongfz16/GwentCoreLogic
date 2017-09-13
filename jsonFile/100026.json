@@ -9,13 +9,39 @@
     "timer":4,
     "prepare":
     {
+        "vector<GameUnit*>*":["right"]
     },
     "DeployEffect":
     {
-//TODO
+        "steps":
+        {
+            "function":
+            [
+                {
+                    "name":"getRight",
+                    "parameter":["self","right"]
+                },
+                {
+                    "name":"eatTarget",
+                    "parameter":["right"]
+                }
+            ]
+        }
     },
     "RoutineEffect":
     {
-
+        "steps":
+        {
+            "function":[
+                {
+                    "name":"getRight",
+                    "parameter":["self","right"]
+                },
+                {
+                    "name":"eatTarget",
+                    "parameter":["right"]
+                }
+            ]
+        }  
     }
 }
